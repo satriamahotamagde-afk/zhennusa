@@ -1,2 +1,3645 @@
-# zhennusa
-ya
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7fc">
+  <title>Zhennusa — Portal Pendidikan</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fc;
+      --surface: #fff;
+      --surface-soft: #f0f3fb;
+      --text: #17213b;
+      --muted: #818ba2;
+      --line: #e8ebf3;
+      --blue: #4568ed;
+      --blue-dark: #294acb;
+      --blue-pale: #edf1ff;
+      --teal: #24ad9b;
+      --orange: #f0a256;
+      --shadow: 0 14px 35px rgba(34, 52, 105, .07);
+      --sidebar: 250px;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #111624;
+      --surface: #1a2030;
+      --surface-soft: #222b3d;
+      --text: #f0f3fa;
+      --muted: #a0aac0;
+      --line: #2b3447;
+      --blue: #7691ff;
+      --blue-dark: #5e79ed;
+      --blue-pale: #252f4c;
+      --teal: #49c9b8;
+      --orange: #f5b269;
+      --shadow: 0 14px 35px rgba(0, 0, 0, .2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      transition: background .25s, color .25s;
+    }
+    body:not(.authenticated) .layout, body:not(.authenticated) .mobile-nav, body:not(.authenticated) #companionLaunch, body:not(.authenticated) #companionPanel { display:none !important; }
+    .auth-screen { min-height:100vh; display:grid; place-items:center; padding:24px; background:radial-gradient(ellipse at 12% 8%,#e0e8ff 0,transparent 35%),radial-gradient(ellipse at 90% 92%,#dff6f1 0,transparent 32%),var(--bg); }
+    :root[data-theme="dark"] .auth-screen { background:radial-gradient(ellipse at 12% 8%,#27345d 0,transparent 35%),radial-gradient(ellipse at 90% 92%,#183b3a 0,transparent 32%),var(--bg); }
+    .auth-card { width:min(440px,100%); padding:clamp(23px,6vw,38px); border:1px solid var(--line); border-radius:24px; background:var(--surface); box-shadow:0 24px 80px #1c2b4c18; animation:pageSlideIn .55s cubic-bezier(.2,.7,.25,1) both; }
+    body.authenticated .auth-screen { display:none; }
+    .auth-brand { display:flex; align-items:center; gap:11px; margin-bottom:28px; }
+    .auth-brand-icon { width:42px; height:42px; display:grid; place-items:center; border-radius:14px; background:var(--blue-pale); font-size:23px; }
+    .auth-brand strong { display:block; font-size:18px; letter-spacing:-.4px; }
+    .auth-brand small { color:var(--muted); font-size:9px; letter-spacing:.7px; }
+    .auth-card h1 { margin:0 0 5px; font-size:24px; letter-spacing:-.7px; }
+    .auth-description { margin:0 0 21px; color:var(--muted); font-size:11px; }
+    .auth-form { display:grid; gap:12px; }
+    .auth-form[hidden], .auth-confirm-wrap[hidden] { display:none; }
+    .auth-field { display:grid; gap:5px; color:var(--text); font-size:10px; font-weight:750; }
+    .auth-field input { width:100%; min-height:42px; padding:10px 12px; border:1px solid var(--line); border-radius:11px; outline:0; background:var(--bg); color:var(--text); font-size:12px; }
+    .auth-field input:focus { border-color:var(--blue); box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 14%,transparent); }
+    .auth-submit { width:100%; min-height:43px; margin-top:3px; border-radius:11px; font-size:11px; }
+    .auth-toggle { margin:17px 0 0; color:var(--muted); text-align:center; font-size:10px; }
+    .auth-toggle button { padding:0; border:0; background:transparent; color:var(--blue); font-weight:800; }
+    .auth-demo { width:100%; min-height:40px; margin-top:12px; }
+    .auth-demo-note { margin:7px 0 0; color:var(--muted); font-size:9px; text-align:center; }
+    .auth-message { display:none; margin:15px 0 0; padding:10px 12px; border:1px solid var(--line); border-radius:11px; color:var(--text); background:var(--surface-soft); font-size:10px; line-height:1.6; overflow-wrap:anywhere; }
+    .auth-message.show { display:block; }
+    .auth-message.error { border-color:#f0b5b5; background:#fff1f1; color:#a83232; }
+    :root[data-theme="dark"] .auth-message.error { border-color:#713b43; background:#38242c; color:#ffb5bb; }
+    .auth-config-note { margin:14px 0 0; color:var(--muted); font-size:9px; line-height:1.6; text-align:center; }
+    button, input, select, textarea { font: inherit; }
+    button { color: inherit; cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--blue) 35%, transparent);
+      outline-offset: 2px;
+    }
+    .layout { min-height: 100vh; }
+    .sidebar {
+      position: fixed; inset: 0 auto 0 0; z-index: 20;
+      width: var(--sidebar); padding: 22px 16px;
+      display: flex; flex-direction: column;
+      background: var(--surface); border-right: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 3px 10px 24px; cursor: pointer; }
+    .brand-copy { line-height: 1.15; }
+    .brand-copy strong { display: block; font-size: 19px; letter-spacing: -.7px; }
+    .brand-copy small { color: var(--muted); font-size: 10px; letter-spacing: .45px; }
+    .crest { width: 43px; height: 43px; overflow: visible; flex: none; filter: drop-shadow(0 5px 8px #4568ed2a); }
+    .crest-shield { transform-origin: center; animation: crestBreathe 3s ease-in-out infinite; }
+    .crest-book { transform-origin: center; animation: bookFlip 3s ease-in-out infinite; }
+    .crest-star { transform-origin: center; animation: starGlow 2.2s ease-in-out infinite; }
+    @keyframes crestBreathe { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2px) rotate(-2deg); } }
+    @keyframes bookFlip { 0%,38%,100% { transform: rotateY(0); } 55%,70% { transform: rotateY(18deg); } }
+    @keyframes starGlow { 0%,100% { opacity: .8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+    .nav-label { padding: 12px 11px 8px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; }
+    .nav-list { display: grid; gap: 5px; }
+    .nav-link {
+      position: relative; width: 100%; display: flex; align-items: center; gap: 12px;
+      padding: 11px 12px; border: 0; border-radius: 12px; background: transparent;
+      color: var(--muted); text-align: left; font-size: 13px; font-weight: 650;
+      transition: .2s;
+    }
+    .nav-link:hover { color: var(--blue); background: var(--blue-pale); }
+    .nav-link.active { color: var(--blue); background: var(--blue-pale); }
+    .nav-link.active:before { content: ""; position: absolute; left: -16px; top: 9px; bottom: 9px; width: 3px; border-radius: 0 4px 4px 0; background: var(--blue); }
+    .nav-icon { width: 20px; height: 20px; display: grid; place-items: center; font-size: 17px; }
+    .nav-count { margin-left: auto; min-width: 20px; padding: 1px 6px; border-radius: 20px; color: #fff; background: var(--orange); font-size: 10px; text-align: center; }
+    .sidebar-spacer { flex: 1; }
+    .help-card { position: relative; overflow: hidden; margin: 16px 2px 13px; padding: 15px; border-radius: 16px; background: linear-gradient(140deg, #3156d8, #7890ff); color: #fff; }
+    .help-card:after { content: "✦"; position: absolute; right: 12px; top: 3px; font-size: 44px; opacity: .17; }
+    .help-card strong { display: block; font-size: 13px; }
+    .help-card p { margin: 5px 0 12px; color: #e4e9ff; font-size: 11px; }
+    .help-card button { padding: 7px 10px; border: 0; border-radius: 9px; background: #fff; color: #3658d0; font-size: 11px; font-weight: 750; }
+    .user-chip { display: flex; align-items: center; gap: 10px; padding: 13px 8px 0; border-top: 1px solid var(--line); }
+    .user-chip { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer; }
+    .avatar { width: 36px; height: 36px; display: grid; place-items: center; flex: none; border-radius: 12px; background: linear-gradient(145deg, #ffd8bd, #f8b899); font-size: 19px; }
+    .avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+    .avatar img[hidden] { display: none; }
+    .user-chip strong { display: block; font-size: 12px; }
+    .user-chip small { display: block; color: var(--muted); font-size: 10px; }
+    .main { min-height: 100vh; margin-left: var(--sidebar); }
+    .main > main { overflow-x: clip; }
+    .topbar {
+      position: sticky; top: 0; z-index: 15; height: 72px;
+      padding: 0 34px; display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(16px);
+    }
+    .breadcrumb { color: var(--muted); font-size: 12px; }
+    .breadcrumb strong { color: var(--text); font-weight: 700; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .search-wrap { position:relative; }
+    .search { width: min(290px, 30vw); height: 39px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); color: var(--muted); }
+    .search span { font-size: 16px; }
+    .search input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--text); background: transparent; font-size: 12px; }
+    .search input::placeholder { color: var(--muted); }
+    .search-history { position:absolute; z-index:30; top:calc(100% + 7px); right:0; width:min(340px,calc(100vw - 24px)); max-height:330px; overflow:auto; padding:8px; border:1px solid var(--line); border-radius:13px; background:var(--surface); box-shadow:var(--shadow); }
+    .search-history[hidden] { display:none; }
+    .search-history-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:3px 5px 7px; color:var(--muted); font-size:9px; font-weight:750; }
+    .search-history-clear { padding:3px 6px; border:0; background:transparent; color:var(--blue); font-size:9px; font-weight:750; }
+    .search-history-item { display:flex; align-items:center; gap:6px; border-radius:9px; }
+    .search-history-item:hover { background:var(--surface-soft); }
+    .search-history-query { flex:1; min-width:0; padding:8px; overflow:hidden; border:0; background:transparent; color:var(--text); text-align:left; text-overflow:ellipsis; white-space:nowrap; font-size:10px; }
+    .search-history-remove { width:28px; height:28px; flex:none; border:0; border-radius:8px; background:transparent; color:var(--muted); font-size:14px; }
+    .search-history-remove:hover { background:var(--blue-pale); color:var(--blue); }
+    .icon-button { position: relative; width: 39px; height: 39px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); transition: .2s; }
+    .icon-button:hover { border-color: var(--blue); transform: translateY(-1px); }
+    .notification-dot { position: absolute; width: 7px; height: 7px; top: 8px; right: 8px; border: 1px solid var(--surface); border-radius: 50%; background: #f16f76; }
+    .page { display: none; max-width: 1440px; margin: auto; padding: 27px 34px 50px; }
+    .page.active { display: block; }
+    .page.active { animation: pageSlideIn .65s cubic-bezier(.2,.7,.25,1) both; }
+    .page.active > * { animation: pageContentSlideIn .55s cubic-bezier(.2,.7,.25,1) both; }
+    .page.active > :nth-child(2) { animation-delay: .07s; }
+    .page.active > :nth-child(3) { animation-delay: .14s; }
+    .page.active > :nth-child(4) { animation-delay: .21s; }
+    .page.active > :nth-child(5) { animation-delay: .28s; }
+    @keyframes pageIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pageSlideIn { from { opacity: 0; transform: translateX(72px); filter: blur(3px); } to { opacity: 1; transform: translateX(0); filter: blur(0); } }
+    @keyframes pageContentSlideIn { from { opacity: 0; transform: translateX(48px); } to { opacity: 1; transform: translateX(0); } }
+    .welcome { margin-bottom: 22px; display: flex; align-items: end; justify-content: space-between; gap: 15px; }
+    .welcome h1 { margin: 0; font-size: 25px; letter-spacing: -.8px; }
+    .welcome p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .date-pill { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .hero {
+      position: relative; min-height: 237px; padding: 30px 34px; overflow: hidden;
+      display: grid; grid-template-columns: 1.1fr .9fr; align-items: center;
+      border-radius: 22px; color: #fff;
+      background: linear-gradient(112deg, #243e9b 0%, #4568ed 57%, #8da3ff 100%);
+      box-shadow: 0 15px 32px #4568ed24;
+    }
+    .hero:before { content: ""; position: absolute; width: 350px; height: 350px; top: -240px; left: 37%; border: 1px solid #ffffff25; border-radius: 50%; box-shadow: 0 0 0 35px #ffffff0a, 0 0 0 75px #ffffff08; }
+    .hero-copy { position: relative; z-index: 2; }
+    .hero-label { display: inline-flex; gap: 6px; align-items: center; padding: 5px 9px; border: 1px solid #ffffff38; border-radius: 30px; background: #ffffff19; color: #eff2ff; font-size: 10px; font-weight: 700; }
+    .hero h2 { max-width: 440px; margin: 12px 0 8px; font-size: clamp(24px, 3vw, 35px); line-height: 1.14; letter-spacing: -1px; }
+    .hero p { max-width: 390px; margin: 0 0 16px; color: #e0e7ff; font-size: 12px; }
+    .button-light { padding: 9px 13px; border: 0; border-radius: 9px; background: white; color: #3156d8; font-size: 11px; font-weight: 800; box-shadow: 0 5px 14px #152b7a24; transition: .2s; }
+    .button-light:hover { transform: translateY(-2px); }
+    .campus-art { position: relative; z-index: 1; height: 190px; display: grid; place-items: center; }
+    .campus-svg { width: min(100%, 340px); max-height: 210px; overflow: visible; filter: drop-shadow(0 12px 12px #172b7624); }
+    .campus-building { transform-origin: 50% 100%; animation: buildingRise 1.1s cubic-bezier(.16,1,.3,1) both; }
+    .campus-flag { transform-origin: 0 100%; animation: flagWave 2.5s ease-in-out infinite; }
+    .campus-cloud { animation: cloudDrift 6s ease-in-out infinite alternate; }
+    .campus-cloud.delay { animation-delay: -3s; }
+    .hero-star { animation: starGlow 2.4s ease-in-out infinite; transform-origin: center; }
+    @keyframes buildingRise { from { opacity: 0; transform: translateY(15px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes flagWave { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-8deg); } }
+    @keyframes cloudDrift { from { transform: translateX(-6px); } to { transform: translateX(9px); } }
+    @keyframes starGlow { 0%,100% { opacity: .7; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.15); } }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 18px; }
+    .stat-card { display: flex; align-items: center; gap: 12px; padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); transition: transform .2s, box-shadow .2s; }
+    .stat-card-button { width:100%; color:var(--text); font:inherit; text-align:left; cursor:pointer; }
+    .stat-card-button:focus-visible { outline:3px solid color-mix(in srgb,var(--blue) 55%,transparent); outline-offset:3px; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .stat-icon { width: 42px; height: 42px; display: grid; place-items: center; flex: none; border-radius: 13px; font-size: 20px; }
+    .stat-icon.blue { background: #edf1ff; } .stat-icon.teal { background: #e3f7f3; } .stat-icon.orange { background: #fff1e2; } .stat-icon.purple { background: #f1eaff; }
+    :root[data-theme="dark"] .stat-icon.blue { background: #293452; }
+    :root[data-theme="dark"] .stat-icon.teal { background: #1e393a; }
+    :root[data-theme="dark"] .stat-icon.orange { background: #413326; }
+    :root[data-theme="dark"] .stat-icon.purple { background: #342b49; }
+    .stat-card small { display: block; color: var(--muted); font-size: 10px; }
+    .stat-card strong { display: block; margin-top: 1px; font-size: 20px; line-height: 1.25; }
+    .stat-card .trend { margin-left: 4px; color: var(--teal); font-size: 9px; font-weight: 750; }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(270px, .85fr); gap: 17px; margin-top: 22px; }
+    .section-card { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .section-heading h2 { margin: 0; font-size: 15px; letter-spacing: -.25px; }
+    .section-heading p { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+    .link-button { padding: 5px 7px; border: 0; background: transparent; color: var(--blue); font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .course-list { display: grid; gap: 12px; }
+    .course-row { width:100%; display: grid; grid-template-columns: 54px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 11px; border: 1px solid var(--line); border-radius: 13px; background:var(--surface); color:var(--text); text-align:left; transition: .2s; }
+    .course-row:hover { border-color: color-mix(in srgb, var(--blue) 42%, var(--line)); transform: translateX(3px); }
+    .course-art { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 13px; font-size: 26px; }
+    .course-art.math { background: #fff0dc; } .course-art.science { background: #dff6f1; } .course-art.language { background: #eee8ff; }
+    .course-details { min-width: 0; }
+    .course-details strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+    .course-details small { color: var(--muted); font-size: 10px; }
+    .progress-track { height: 5px; overflow: hidden; margin-top: 8px; border-radius: 5px; background: var(--surface-soft); }
+    .progress-value { height: 100%; border-radius: inherit; background: var(--blue); transition: width .6s ease; }
+    .progress-value.teal { background: var(--teal); } .progress-value.orange { background: var(--orange); }
+    .course-percent { color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .schedule-list { display: grid; gap: 5px; }
+    .schedule-item { display: grid; grid-template-columns: 52px 3px minmax(0,1fr); align-items: stretch; gap: 10px; min-height: 58px; padding: 7px 2px; }
+    .schedule-time { padding-top: 2px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .schedule-bar { border-radius: 5px; background: var(--blue); }
+    .schedule-bar.teal { background: var(--teal); } .schedule-bar.orange { background: var(--orange); }
+    .schedule-item strong { display: block; font-size: 11px; }
+    .schedule-item small { color: var(--muted); font-size: 9px; }
+    .schedule-week-tabs { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
+    .schedule-day-tab { padding:8px 13px; border:1px solid var(--line); border-radius:22px; background:var(--surface); color:var(--muted); font-size:10px; font-weight:750; }
+    .schedule-day-tab.active { border-color:var(--blue); background:var(--blue-pale); color:var(--blue); }
+    .schedule-day-heading { margin:0 0 12px; font-size:15px; }
+    .schedule-page-list { display:grid; gap:5px; }
+    .schedule-empty { padding:18px; border:1px dashed var(--line); border-radius:12px; color:var(--muted); font-size:10px; }
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; margin-top: 17px; }
+    .announcement-list, .task-list { display: grid; gap: 9px; }
+    .announcement { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .announcement:last-child { padding-bottom: 0; border: 0; }
+    .announcement-mark { width: 32px; height: 32px; display: grid; place-items: center; flex: none; border-radius: 10px; background: var(--blue-pale); font-size: 15px; }
+    .announcement strong { display: block; font-size: 11px; }
+    .announcement small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .task { display: flex; align-items: flex-start; gap: 9px; font-size: 11px; }
+    .task input { width: 15px; height: 15px; margin: 1px 0 0; accent-color: var(--blue); }
+    .task small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .task.done span { color: var(--muted); text-decoration: line-through; }
+    .page-title { margin: 0 0 4px; font-size: 23px; letter-spacing: -.7px; }
+    .page-description { margin: 0 0 22px; color: var(--muted); font-size: 12px; }
+    .course-catalog { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+    .catalog-card { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); transition: .22s; }
+    .catalog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .catalog-banner { min-height: 104px; display: grid; place-items: center; font-size: 42px; }
+    .catalog-body { padding: 14px; }
+    .catalog-body h3 { margin: 0; font-size: 13px; }
+    .catalog-body p { margin: 5px 0 12px; color: var(--muted); font-size: 10px; }
+    .catalog-meta { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 10px; }
+    .learning-hero { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 4px 0 17px; padding: 23px 26px; border-radius: 18px; color: #fff; background: linear-gradient(110deg,#263f9d,#5273f0 70%,#8398ff); }
+    .learning-hero:after { content: "✦"; position: absolute; right: 27%; top: -24px; color: #ffffff28; font-size: 130px; }
+    .learning-hero-copy { position: relative; z-index: 1; }
+    .learning-kicker { color: #dce5ff; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; }
+    .learning-hero h2 { margin: 7px 0 4px; font-size: 22px; letter-spacing: -.5px; }
+    .learning-hero p { margin: 0; color: #e0e7ff; font-size: 10px; }
+    .learning-hero-mark { position: relative; z-index: 1; margin-right: 20px; font-size: 51px; filter: drop-shadow(0 6px 6px #1b2b812c); animation: mascotFloat 3s ease-in-out infinite; }
+    .learning-overview { display: grid; grid-template-columns: repeat(3,1fr); gap: 11px; margin-bottom: 20px; }
+    .learning-stat { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); }
+    .learning-stat-icon { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 11px; background: var(--blue-pale); font-size: 17px; }
+    .learning-stat small { display: block; color: var(--muted); font-size: 9px; }
+    .learning-stat strong { display: block; font-size: 15px; }
+    .learning-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 12px; }
+    .learning-toolbar h2 { margin: 0; font-size: 15px; }
+    .learning-toolbar p { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+    .course-search { width: min(250px, 42%); display: flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--muted); }
+    .course-search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 10px; }
+    .learning-filter-row { margin-bottom: 14px; }
+    .catalog-banner { position: relative; overflow: hidden; }
+    .catalog-banner:after { content: ""; position: absolute; width: 100px; height: 100px; right: -37px; top: -52px; border-radius: 50%; background: #ffffff76; }
+    .catalog-banner span { position: relative; z-index: 1; transition: transform .25s; }
+    .catalog-card:hover .catalog-banner span { transform: translateY(-3px) rotate(-5deg) scale(1.08); }
+    .catalog-card { display: flex; flex-direction: column; }
+    .catalog-body { flex: 1; display: flex; flex-direction: column; }
+    .catalog-body .catalog-meta { margin-top: auto; padding-top: 11px; }
+    .course-detail { display: none; }
+    .course-detail.active { display: block; animation: pageIn .3s ease both; }
+    .course-detail-top { display: flex; align-items: center; gap: 11px; margin-bottom: 14px; }
+    .course-back { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .course-detail-top small { color: var(--muted); font-size: 10px; }
+    .detail-hero { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 18px; padding: 21px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); }
+    .detail-title-row { display: flex; align-items: center; gap: 13px; }
+    .detail-course-icon { width: 55px; height: 55px; display: grid; place-items: center; flex: none; border-radius: 15px; font-size: 29px; }
+    .detail-title-row h2 { margin: 0; font-size: 18px; }
+    .detail-title-row p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .detail-progress { width: 170px; }
+    .detail-progress-line { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: 10px; }
+    .detail-progress-line span { color: var(--muted); }
+    .detail-progress .progress-track { height: 7px; margin: 0; }
+    .course-tabs { display: flex; gap: 5px; margin: 16px 0 12px; padding: 4px; width: fit-content; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
+    .course-tab { padding: 8px 13px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 10px; font-weight: 750; }
+    .course-tab.active { background: var(--blue-pale); color: var(--blue); }
+    .course-tab-panel { display: none; }
+    .course-tab-panel.active { display: block; }
+    .lesson-layout { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(230px,.75fr); gap: 13px; align-items: start; }
+    .lesson-reader, .lesson-sidebar, .assignment-panel, .notes-panel { padding: 18px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+    .lesson-reader h3 { margin: 0 0 8px; font-size: 16px; }
+    .lesson-meta { display: flex; gap: 11px; flex-wrap: wrap; margin-bottom: 14px; color: var(--muted); font-size: 9px; }
+    .lesson-body { color: var(--text); font-size: 11px; line-height: 1.8; }
+    .lesson-body p { margin: 0 0 10px; }
+    .lesson-body ul { margin: 7px 0 13px; padding-left: 18px; }
+    .lesson-callout { padding: 11px 12px; border-left: 3px solid var(--blue); border-radius: 0 9px 9px 0; background: var(--blue-pale); font-size: 10px; line-height: 1.65; }
+    .lesson-quiz { margin-top: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+    .lesson-quiz h4 { margin: 0 0 9px; font-size: 11px; }
+    .quiz-option { display: flex; align-items: center; gap: 7px; margin: 7px 0; color: var(--muted); font-size: 10px; cursor: pointer; }
+    .quiz-option input { accent-color: var(--blue); }
+    .quiz-feedback { min-height: 17px; margin-top: 8px; font-size: 10px; font-weight: 700; }
+    .lesson-reader-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 15px; padding-top: 13px; border-top: 1px solid var(--line); }
+    .lesson-reader-actions > div { display: flex; gap: 7px; }
+    .lesson-sidebar h3, .assignment-panel h3, .notes-panel h3 { margin: 0 0 11px; font-size: 12px; }
+    .lesson-list { display: grid; gap: 6px; }
+    .lesson-list-item { width: 100%; display: grid; grid-template-columns: 23px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 9px; border: 1px solid transparent; border-radius: 10px; background: transparent; text-align: left; }
+    .lesson-list-item:hover { background: var(--surface-soft); }
+    .lesson-list-item.active { border-color: color-mix(in srgb,var(--blue) 35%,var(--line)); background: var(--blue-pale); }
+    .lesson-list-index { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 7px; background: var(--surface-soft); color: var(--muted); font-size: 9px; }
+    .lesson-list-item.active .lesson-list-index { background: var(--blue); color: #fff; }
+    .lesson-list-item.done .lesson-list-index { background: #e3f7f0; color: #168765; }
+    .lesson-list-title { font-size: 9px; line-height: 1.4; }
+    .lesson-duration { color: var(--muted); font-size: 8px; white-space: nowrap; }
+    .assignment-card { display: grid; grid-template-columns: 37px minmax(0,1fr) auto; align-items: center; gap: 11px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .assignment-card:last-child { border-bottom: 0; }
+    .assignment-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: var(--blue-pale); font-size: 17px; }
+    .assignment-card strong { display: block; font-size: 10px; }
+    .assignment-card small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .assignment-photo-input { display: none; }
+    .assignment-upload-note { margin: 8px 0 0; color: var(--muted); font-size: 9px; line-height: 1.6; }
+    .assignment-state { color: #bc7725; font-size: 9px; font-weight: 750; }
+    .assignment-state.done { color: var(--teal); }
+    .notes-panel textarea { width: 100%; min-height: 200px; padding: 12px; border: 1px solid var(--line); border-radius: 11px; outline: 0; resize: vertical; background: var(--bg); color: var(--text); font: inherit; font-size: 11px; line-height: 1.7; }
+    .notes-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:9px; }
+    .notes-status { margin:0; color: var(--muted); font-size: 9px; }
+    .notes-download { flex:none; }
+    .button-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .focus-work-view { position: fixed; inset: 0; z-index: 60; display: none; overflow-y: auto; background: radial-gradient(ellipse at 12% 0%,color-mix(in srgb,var(--blue-pale) 80%,transparent),transparent 36%),radial-gradient(ellipse at 95% 35%,color-mix(in srgb,#b8e4ff 26%,transparent),transparent 32%),var(--bg); }
+    .focus-work-view.active { display: block; animation: pageIn .25s ease both; }
+    .focus-work-topbar { position: sticky; top: 0; z-index: 2; min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px clamp(15px,4vw,48px); border-bottom: 1px solid color-mix(in srgb,var(--blue) 12%,var(--line)); background: color-mix(in srgb,var(--surface) 88%,transparent); backdrop-filter: blur(18px); box-shadow: 0 5px 25px #26386b0a; }
+    .focus-brand { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 800; }
+    .focus-brand-mark { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 11px; background: var(--blue-pale); font-size: 18px; }
+    .focus-brand small { display: block; color: var(--muted); font-size: 9px; font-weight: 500; }
+    .focus-clock { display: flex; align-items: center; gap: 9px; padding: 8px 14px; border: 1px solid color-mix(in srgb,var(--blue) 20%,var(--line)); border-radius: 14px; background: linear-gradient(135deg,var(--surface),var(--blue-pale)); box-shadow: 0 7px 20px #334a8b12; }
+    .focus-clock-icon { color: var(--blue); font-size: 16px; }
+    .focus-clock-label { display: block; margin-bottom: 2px; color: var(--muted); font-size: 8px; font-weight: 750; letter-spacing: .08em; }
+    .focus-clock strong { display: block; min-width: 62px; color: var(--blue); font-variant-numeric: tabular-nums; font-size: 16px; letter-spacing: .5px; }
+    .focus-clock.urgent { border-color:#ef9a9a; background:linear-gradient(135deg,#fff5f4,#ffe5e3); }
+    .focus-clock.urgent strong,.focus-clock.urgent .focus-clock-icon { color:#d84848; }
+    .focus-top-actions { display: flex; align-items: center; gap: 7px; }
+    .focus-work-main { width: min(900px,100%); margin: 0 auto; padding: 31px clamp(15px,3vw,30px) 60px; }
+    .focus-course-line { width: fit-content; display: flex; align-items: center; gap: 10px; margin: 0 auto 15px; padding: 8px 14px; border: 1px solid color-mix(in srgb,var(--blue) 15%,var(--line)); border-radius: 30px; background: color-mix(in srgb,var(--surface) 85%,transparent); color: var(--muted); font-size: 10px; box-shadow: 0 5px 18px #283b6810; }
+    .focus-course-line strong { color: var(--text); font-size: 11px; }
+    .focus-notice { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding: 12px 16px; border: 1px solid #f1d8ae; border-radius: 14px; background: linear-gradient(110deg,#fff8eb,#fffdf8); color: #825a20; font-size: 10px; line-height: 1.6; box-shadow: 0 6px 20px #91631b0b; }
+    :root[data-theme="dark"] .focus-notice { border-color: #53432b; background: #342d22; color: #f0cb8b; }
+    .focus-question-card { position: relative; overflow: hidden; padding: clamp(20px,4.4vw,38px); border: 1px solid color-mix(in srgb,var(--blue) 14%,var(--line)); border-radius: 25px; background: color-mix(in srgb,var(--surface) 96%,transparent); box-shadow: 0 25px 70px #283b6812,0 3px 10px #283b6809; }
+    .focus-question-card::before { position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,#4568ed,#54b6e8,#55c9b5); content:""; }
+    .focus-progress-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 13px; color: var(--muted); font-size: 10px; }
+    .focus-progress-row span { padding: 6px 11px; border:1px solid color-mix(in srgb,var(--blue) 14%,var(--line)); border-radius:30px; background:var(--blue-pale); color:var(--blue); font-size:10px; font-weight:800; }
+    .focus-progress-row strong { display:flex; align-items:center; gap:6px; color:var(--teal); font-size:10px; }
+    .focus-progress-row strong::before { width:7px; height:7px; border-radius:50%; background:currentColor; content:""; box-shadow:0 0 0 4px color-mix(in srgb,currentColor 13%,transparent); }
+    .focus-question-card h1 { margin: 0 0 5px; color:var(--blue); font-size: 10px; font-weight:850; letter-spacing: .13em; text-transform:uppercase; }
+    .focus-question-card .focus-intro { margin: 0 0 20px; color: var(--muted); font-size: 11px; line-height:1.6; }
+    .focus-material { margin: 0 0 19px; padding: 14px 16px; border:1px solid color-mix(in srgb,var(--blue) 9%,transparent); border-radius: 14px; background: linear-gradient(120deg,var(--blue-pale),color-mix(in srgb,var(--surface) 86%,var(--blue-pale))); font-size: 11px; line-height: 1.8; }
+    .focus-material strong { display: block; margin-bottom: 5px; color: var(--blue); font-size: 10px; }
+    .focus-question { position:relative; margin: 0 0 13px; padding: 18px 19px 18px 54px; border:1px solid var(--line); border-radius:15px; background:var(--surface); color:var(--text); font-size: 14px; font-weight: 800; line-height: 1.7; box-shadow:0 7px 22px #1d2c4b08; }
+    .focus-question::before { position:absolute; left:16px; top:17px; display:grid; width:25px; height:25px; place-items:center; border-radius:8px; background:var(--blue-pale); color:var(--blue); font-size:12px; content:"?"; }
+    .focus-answers { display: grid; gap: 10px; counter-reset:focus-option; }
+    .focus-answer { position:relative; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 15px; border: 1px solid var(--line); border-radius: 14px; background:var(--surface); color:var(--text); font-size: 12px; line-height:1.6; cursor: pointer; transition: border-color .18s,background .18s,transform .18s,box-shadow .18s; counter-increment:focus-option; }
+    .focus-answer::before { flex:0 0 31px; display:grid; width:31px; height:31px; place-items:center; border:1px solid var(--line); border-radius:10px; background:var(--surface-soft); color:var(--muted); font-size:10px; font-weight:850; content:counter(focus-option,upper-alpha); transition:.18s; }
+    .focus-answer:hover { transform:translateY(-1px); border-color:color-mix(in srgb,var(--blue) 50%,var(--line)); background:var(--blue-pale); box-shadow:0 7px 17px #334a8b12; }
+    .focus-answer:has(input:checked) { border-color:var(--blue); background:linear-gradient(100deg,var(--blue-pale),color-mix(in srgb,var(--surface) 75%,var(--blue-pale))); box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 13%,transparent),0 8px 20px #334a8b10; }
+    .focus-answer:has(input:checked)::before { border-color:var(--blue); background:var(--blue); color:white; }
+    .focus-answer input { position:absolute; width:1px; height:1px; opacity:0; }
+    .focus-answer:focus-within { outline:3px solid color-mix(in srgb,var(--blue) 28%,transparent); outline-offset:2px; }
+    .focus-question-nav { display: flex; gap: 8px; margin: 0 0 22px; padding: 8px 4px 11px; overflow-x: auto; overscroll-behavior-x: contain; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--blue) var(--blue-pale); touch-action: pan-x; mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent); }
+    .focus-question-nav button { flex: 0 0 42px; min-height: 40px; border: 1px solid var(--line); border-radius: 12px; background:var(--surface); color:var(--muted); font-size: 11px; font-weight:750; cursor: pointer; transition:.18s; box-shadow:0 3px 9px #1c2b4c08; }
+    .focus-question-nav button:hover { border-color:var(--blue); color:var(--blue); transform:translateY(-2px); }
+    .focus-question-nav button.answered { border-color:color-mix(in srgb,var(--teal) 45%,var(--line)); background:color-mix(in srgb,var(--teal) 9%,var(--surface)); color:var(--teal); }
+    .focus-question-nav button.skipped { border-color:#ef9a9a; background:#fff0ef; color:#d84848; box-shadow:0 4px 12px #d8484818; }
+    :root[data-theme="dark"] .focus-question-nav button.skipped { border-color:#9b4c52; background:#3a242b; color:#ff9097; }
+    .focus-question-nav button.current { outline:3px solid color-mix(in srgb,var(--blue) 18%,transparent); border-color:var(--blue); background:var(--blue); color:#fff; font-weight:850; box-shadow:0 5px 14px color-mix(in srgb,var(--blue) 28%,transparent); }
+    .focus-question-nav button.current.skipped { outline-color:#ef9a9a; border-color:#d84848; background:linear-gradient(145deg,var(--blue) 58%,#d84848 58%); color:#fff; }
+    .focus-nav-legend { display:flex; align-items:center; gap:13px; margin:-12px 0 16px; color:var(--muted); font-size:9px; }
+    .focus-nav-legend span { display:inline-flex; align-items:center; gap:5px; }
+    .focus-nav-legend i { width:8px; height:8px; border-radius:3px; background:var(--teal); }
+    .focus-nav-legend .skipped-dot { background:#e0525c; }
+    .focus-feedback { min-height: 18px; margin-top: 10px; font-size: 10px; font-weight: 750; }
+    .focus-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 23px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .focus-footer small { color: var(--muted); font-size: 9px; }
+    .focus-footer > div { display:flex; gap:8px; }
+    .focus-footer .button-primary,.focus-footer .button-secondary,.focus-top-actions .button-secondary { padding:10px 15px; border-radius:11px; }
+    .focus-footer .button-secondary:not(:disabled):hover { border-color:var(--blue); background:var(--blue); color:#fff; transform:translateY(-1px); box-shadow:0 6px 16px color-mix(in srgb,var(--blue) 25%,transparent); transition:.2s; }
+    .focus-result-view { padding-bottom:40px; }
+    .focus-result-hero { margin-bottom:16px; padding:24px; border:1px solid color-mix(in srgb,var(--blue) 16%,var(--line)); border-radius:20px; background:linear-gradient(130deg,var(--surface),var(--blue-pale)); }
+    .focus-result-hero h1 { margin:0 0 6px; font-size:clamp(23px,4vw,32px); }
+    .focus-result-hero p { margin:0; color:var(--muted); font-size:11px; line-height:1.7; }
+    .focus-result-score { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:15px 0; }
+    .focus-result-stat { padding:13px; border:1px solid var(--line); border-radius:13px; background:var(--surface); }
+    .focus-result-stat strong { display:block; font-size:21px; }
+    .focus-result-stat small { color:var(--muted); font-size:9px; }
+    .focus-result-stat.correct strong { color:var(--teal); }
+    .focus-result-stat.incorrect strong { color:#d84848; }
+    .focus-result-question { margin:11px 0; padding:15px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .focus-result-question.correct { border-color:color-mix(in srgb,var(--teal) 35%,var(--line)); }
+    .focus-result-question.incorrect { border-color:color-mix(in srgb,#d84848 28%,var(--line)); }
+    .focus-result-question h3 { margin:0 0 9px; font-size:11px; line-height:1.65; }
+    .focus-result-question p { margin:5px 0 0; color:var(--muted); font-size:10px; line-height:1.7; overflow-wrap:anywhere; }
+    .focus-result-question .focus-result-verdict { font-weight:800; }
+    .focus-result-question.correct .focus-result-verdict { color:var(--teal); }
+    .focus-result-question.incorrect .focus-result-verdict { color:#d84848; }
+    .focus-result-back { display:block; min-height:44px; margin:22px auto 0; padding:12px 20px; }
+    #focusWorkView.result-mode .focus-clock,#focusWorkView.result-mode .focus-top-actions { display:none; }
+    @media (max-width:480px) {
+      .focus-result-hero { padding:18px; }
+      .focus-result-score { gap:7px; }
+      .focus-result-stat { padding:10px 8px; }
+      .focus-result-stat strong { font-size:18px; }
+      .focus-result-stat small { font-size:8px; }
+      .focus-result-question { padding:12px; }
+    }
+    .focus-confirm { position:fixed; inset:0; z-index:70; display:grid; place-items:center; padding:18px; background:#101a35a8; backdrop-filter:blur(9px); }
+    .focus-confirm[hidden] { display:none; }
+    .focus-confirm-card { width:min(430px,100%); padding:28px; border:1px solid color-mix(in srgb,var(--blue) 18%,var(--line)); border-radius:24px; background:var(--surface); box-shadow:0 30px 100px #06112e55; text-align:center; animation:pageIn .22s ease both; }
+    .focus-confirm-icon { display:grid; width:60px; height:60px; place-items:center; margin:0 auto 15px; border:1px solid #f6e1bb; border-radius:19px; background:linear-gradient(140deg,#fff8e9,#ffedd0); font-size:26px; }
+    .focus-confirm-card h2 { margin:0 0 8px; color:var(--text); font-size:19px; }
+    .focus-confirm-card p { margin:0; color:var(--muted); font-size:12px; line-height:1.75; }
+    .focus-confirm-actions { display:flex; justify-content:center; gap:9px; margin-top:22px; }
+    .focus-confirm-actions button { min-width:120px; padding:11px 15px; border-radius:11px; font-size:11px; }
+    #focusConfirm:not([hidden]) [data-focus-confirm="cancel"] { position:relative; overflow:hidden; border-color:color-mix(in srgb,var(--blue) 35%,var(--line)); background:var(--blue-pale); color:var(--blue); box-shadow:0 5px 16px color-mix(in srgb,var(--blue) 15%,transparent); animation:focusContinueBreathe 2.4s ease-in-out infinite; }
+    #focusConfirm:not([hidden]) [data-focus-confirm="cancel"]::after { display:inline-block; margin-left:7px; content:"→"; transition:transform .2s ease; }
+    #focusConfirm:not([hidden]) [data-focus-confirm="cancel"]:hover { border-color:var(--blue); background:var(--blue); color:#fff; box-shadow:0 8px 22px color-mix(in srgb,var(--blue) 30%,transparent); }
+    #focusConfirm:not([hidden]) [data-focus-confirm="cancel"]:hover::after { transform:translateX(4px); }
+    #focusConfirm:not([hidden]) [data-focus-confirm="cancel"]:focus-visible { outline:3px solid color-mix(in srgb,var(--blue) 35%,transparent); outline-offset:3px; }
+    @keyframes focusContinueBreathe { 0%,100% { transform:translateY(0); box-shadow:0 5px 16px color-mix(in srgb,var(--blue) 12%,transparent); } 50% { transform:translateY(-2px); box-shadow:0 8px 21px color-mix(in srgb,var(--blue) 24%,transparent); } }
+    .focus-lock { position: fixed; inset: 0; z-index: 65; display: grid; place-items: center; padding: 18px; background: #121a2dcc; backdrop-filter: blur(8px); }
+    .focus-lock[hidden] { display: none; }
+    .focus-lock-card { width: min(410px,100%); padding: 25px; border: 1px solid var(--line); border-radius: 19px; background: var(--surface); text-align: center; box-shadow: 0 25px 80px #0004; animation: pageIn .2s ease both; }
+    .focus-lock-icon { width: 56px; height: 56px; display: grid; place-items: center; margin: 0 auto 13px; border-radius: 17px; background: #fff1df; font-size: 26px; }
+    .focus-lock-card h2 { margin: 0 0 7px; font-size: 18px; }
+    .focus-lock-card p { margin: 0 0 16px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .focus-lock-card .button-primary { min-width: 180px; }
+    .focus-warning-count { display: block; margin-top: 12px; color: var(--muted); font-size: 9px; }
+    .focus-protected, .focus-protected * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    @media (max-width:760px) {
+      .focus-work-topbar { min-height: 58px; gap: 8px; padding: 8px 12px; }
+      .focus-brand { gap: 7px; font-size: 11px; }
+      .focus-brand-mark { width: 31px; height: 31px; font-size: 16px; }
+      .focus-clock { gap: 6px; padding: 6px 8px; }
+      .focus-clock strong { min-width: 51px; font-size: 13px; }
+      .focus-top-actions .button-secondary { padding: 7px 8px; font-size: 9px; }
+      .focus-work-main { padding-top: 17px; }
+      .focus-footer { align-items:stretch; flex-wrap:wrap; }
+      .focus-footer small { order:3; width:100%; text-align:center; }
+      .focus-footer > div { margin-left:auto; }
+      .focus-footer > .button-secondary,.focus-footer > div button { padding:9px 11px; }
+      .focus-question-card { border-radius:20px; }
+    }
+    .button-primary { padding: 8px 11px; border: 0; border-radius: 9px; background: var(--blue); color: white; font-size: 10px; font-weight: 750; transition: .2s; }
+    .button-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .filter-chip { padding: 7px 11px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--muted); font-size: 10px; }
+    .filter-chip.active { border-color: var(--blue); background: var(--blue-pale); color: var(--blue); }
+    .admin-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .admin-card { padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+    .admin-card .admin-icon { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 12px; border-radius: 13px; background: var(--blue-pale); font-size: 20px; }
+    .admin-card h3 { margin: 0; font-size: 13px; }
+    .admin-card p { min-height: 36px; margin: 5px 0 14px; color: var(--muted); font-size: 10px; }
+    .academic-summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:12px; margin:16px 0; }
+    .academic-summary-card { padding:15px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .academic-summary-card small { display:block; color:var(--muted); font-size:9px; }
+    .academic-summary-card strong { display:block; margin-top:5px; font-size:20px; }
+    .academic-month-list { display:grid; gap:12px; margin-top:14px; }
+    .academic-month-card { padding:15px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .academic-month-head { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .academic-month-head h3 { margin:0; font-size:13px; }
+    .academic-month-head p { margin:4px 0 0; color:var(--muted); font-size:9px; }
+    .academic-month-total { color:var(--blue); font-size:13px; font-weight:850; white-space:nowrap; }
+    .academic-month-stats { display:flex; flex-wrap:wrap; gap:7px; margin-top:11px; }
+    .academic-month-stats span { padding:5px 8px; border-radius:20px; background:var(--surface-soft); color:var(--muted); font-size:9px; }
+    .academic-month-history { display:grid; gap:7px; margin-top:11px; padding-top:10px; border-top:1px solid var(--line); }
+    .academic-month-entry { display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 12px; color:var(--muted); font-size:9px; line-height:1.55; }
+    .academic-month-entry strong { color:var(--text); font-size:9px; }
+    .academic-course-list { display:grid; gap:10px; }
+    .academic-course-card { padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .academic-course-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .academic-course-title { display:flex; align-items:center; gap:9px; min-width:0; }
+    .academic-course-icon { display:grid; width:36px; height:36px; flex:none; place-items:center; border-radius:11px; background:var(--blue-pale); font-size:18px; }
+    .academic-course-title strong { display:block; font-size:11px; }
+    .academic-course-title small,.academic-course-meta { color:var(--muted); font-size:9px; }
+    .academic-course-score { flex:none; text-align:right; }
+    .academic-course-score strong { display:block; color:var(--blue); font-size:17px; }
+    .academic-course-progress { height:6px; margin:10px 0 7px; overflow:hidden; border-radius:9px; background:var(--surface-soft); }
+    .academic-course-progress span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--blue),#6ba5ff); }
+    .academic-course-history { display:grid; gap:6px; margin-top:9px; padding-top:9px; border-top:1px solid var(--line); }
+    .academic-course-history p { margin:0; color:var(--muted); font-size:9px; line-height:1.55; }
+    .academic-empty { padding:18px; border:1px dashed var(--line); border-radius:12px; color:var(--muted); font-size:10px; line-height:1.7; }
+    @media (max-width:760px) { .academic-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    .table-wrap { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .data-table th { padding: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 9px; font-weight: 750; text-transform: uppercase; letter-spacing: .4px; }
+    .data-table td { padding: 12px 10px; border-bottom: 1px solid var(--line); font-size: 10px; }
+    .data-table tr:last-child td { border-bottom: 0; }
+    .status { padding: 4px 7px; border-radius: 20px; background: #e5f7f0; color: #23896c; font-size: 9px; font-weight: 750; white-space: nowrap; }
+    .status.wait { background: #fff1df; color: #bb7526; }
+    :root[data-theme="dark"] .status { background: #203d37; color: #75d8b4; }
+    :root[data-theme="dark"] .status.wait { background: #423422; color: #ffd08a; }
+    .information-list { display: grid; gap: 12px; }
+    .info-card { display: grid; grid-template-columns: 86px minmax(0,1fr); align-items: center; gap: 15px; padding: 14px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); transition: .2s; }
+    .info-card:hover { border-color: var(--blue); transform:translateX(3px); }
+    .info-open-button { width:100%; min-width:0; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; padding:0; border:0; background:transparent; color:inherit; text-align:left; }
+    .info-open-button:focus-visible { border-radius:8px; }
+    .info-open-copy { min-width:0; }
+    .info-open-copy h3 { margin:0 0 4px; font-size:12px; }
+    .info-open-copy p { margin:0; color:var(--muted); font-size:10px; }
+    .info-read-more { color:var(--blue); font-size:9px; font-weight:800; white-space:nowrap; }
+    .info-date { padding: 10px 5px; border-radius: 11px; background: var(--blue-pale); color: var(--blue); text-align: center; font-weight: 800; }
+    .info-date strong { display: block; font-size: 18px; line-height: 1.1; }
+    .info-date small { font-size: 9px; text-transform: uppercase; }
+    .announcement-detail-back { margin-bottom:13px; }
+    .announcement-detail-hero { padding:clamp(20px,4vw,32px); border:1px solid var(--line); border-radius:18px; background:linear-gradient(130deg,var(--surface),var(--blue-pale)); }
+    .announcement-detail-meta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:13px; }
+    .announcement-category { padding:5px 9px; border-radius:18px; background:var(--blue-pale); color:var(--blue); font-size:9px; font-weight:800; }
+    .announcement-detail-meta time { color:var(--muted); font-size:10px; }
+    .announcement-detail-icon { display:grid; width:48px; height:48px; place-items:center; margin-bottom:13px; border-radius:15px; background:var(--surface); font-size:25px; box-shadow:var(--shadow); }
+    .announcement-detail-hero h1 { max-width:820px; margin:0 0 12px; font-size:clamp(22px,3vw,31px); line-height:1.2; letter-spacing:-.6px; }
+    .announcement-detail-body { max-width:850px; margin:0; color:var(--muted); font-size:12px; line-height:1.8; }
+    .announcement-detail-content { margin-top:15px; padding:20px; border:1px solid var(--line); border-radius:16px; background:var(--surface); }
+    .announcement-detail-content h2 { margin:0 0 12px; font-size:15px; }
+    .announcement-detail-article { display:grid; gap:13px; margin-bottom:20px; }
+    .announcement-detail-article p { margin:0; color:var(--muted); font-size:12px; line-height:1.85; }
+    .announcement-detail-list { display:grid; gap:11px; margin:0; padding:0; list-style:none; }
+    .announcement-detail-list li { display:grid; grid-template-columns:28px minmax(0,1fr); gap:10px; color:var(--muted); font-size:11px; line-height:1.65; }
+    .announcement-detail-list li:before { display:grid; width:27px; height:27px; place-items:center; border-radius:9px; background:var(--blue-pale); color:var(--blue); content:"✓"; font-size:11px; font-weight:850; }
+    .service-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .service-card { padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+    .service-card .admin-icon { margin-bottom: 12px; }
+    .service-card h3 { margin: 0; font-size: 13px; }
+    .service-card p { min-height: 35px; margin: 6px 0 14px; color: var(--muted); font-size: 10px; }
+    .library-hero { position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.3fr) minmax(150px,.7fr); align-items:center; gap:20px; margin:0 0 17px; padding:25px 28px; border-radius:19px; color:#fff; background:linear-gradient(115deg,#203b8d,#4568ed 64%,#8c9aff); }
+    .library-hero:after { position:absolute; right:22px; top:-38px; color:#ffffff20; content:"▤"; font-size:190px; line-height:1; transform:rotate(-12deg); }
+    .library-hero-copy { position:relative; z-index:1; }
+    .library-hero-kicker { color:#dce5ff; font-size:9px; font-weight:850; letter-spacing:1.2px; }
+    .library-hero h2 { margin:8px 0; font-size:clamp(23px,3vw,34px); line-height:1.15; letter-spacing:-.7px; }
+    .library-hero p { max-width:540px; margin:0; color:#e4e9ff; font-size:11px; line-height:1.7; }
+    .library-hero-mark { position:relative; z-index:1; display:grid; place-items:center; justify-self:center; width:112px; height:112px; border:1px solid #ffffff50; border-radius:32px; background:#ffffff20; font-size:58px; box-shadow:0 14px 34px #162c7133; transform:rotate(4deg); animation:libraryBookFloat 3s ease-in-out infinite; }
+    @keyframes libraryBookFloat { 0%,100% { transform:translateY(0) rotate(4deg); } 50% { transform:translateY(-7px) rotate(1deg); } }
+    .library-fact-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:17px; }
+    .library-fact { display:flex; align-items:center; gap:11px; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .library-fact-icon { width:38px; height:38px; display:grid; place-items:center; flex:none; border-radius:12px; background:var(--blue-pale); font-size:18px; }
+    .library-fact strong { display:block; font-size:11px; }
+    .library-fact small { display:block; margin-top:3px; color:var(--muted); font-size:9px; line-height:1.5; }
+    .library-content-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr); gap:15px; }
+    .library-detail-card { padding:18px; border:1px solid var(--line); border-radius:16px; background:var(--surface); }
+    .library-detail-card h3 { margin:0 0 5px; font-size:13px; }
+    .library-detail-card > p { margin:0 0 13px; color:var(--muted); font-size:10px; line-height:1.65; }
+    .library-steps { display:grid; gap:10px; margin:0; padding:0; list-style:none; counter-reset:library-step; }
+    .library-steps li { position:relative; display:grid; grid-template-columns:30px minmax(0,1fr); align-items:start; gap:10px; counter-increment:library-step; }
+    .library-steps li:before { display:grid; width:29px; height:29px; place-items:center; border-radius:9px; background:var(--blue-pale); color:var(--blue); content:counter(library-step); font-size:10px; font-weight:850; }
+    .library-steps strong { display:block; font-size:10px; }
+    .library-steps small { display:block; margin-top:2px; color:var(--muted); font-size:9px; line-height:1.55; }
+    .library-policy-list { display:grid; gap:9px; margin:0; padding:0; list-style:none; }
+    .library-policy-list li { display:flex; align-items:flex-start; gap:8px; color:var(--muted); font-size:10px; line-height:1.55; }
+    .library-policy-list li:before { color:var(--teal); content:"✓"; font-weight:900; }
+    .library-note { margin-top:14px; padding:10px 11px; border:1px solid color-mix(in srgb,var(--orange) 35%,var(--line)); border-radius:11px; background:color-mix(in srgb,var(--orange) 9%,var(--surface)); color:var(--muted); font-size:9px; line-height:1.6; }
+    .library-page-back { margin-bottom:13px; }
+    .library-booking { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(250px,.9fr); gap:18px; align-items:center; margin:15px 0; padding:20px; border:1px solid color-mix(in srgb,var(--blue) 16%,var(--line)); border-radius:17px; background:linear-gradient(120deg,var(--surface),var(--blue-pale)); }
+    .library-booking h3 { margin:0 0 5px; font-size:14px; }
+    .library-booking-copy p { margin:0; color:var(--muted); font-size:10px; line-height:1.65; }
+    .library-booking-form { display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:end; }
+    .library-booking-form .form-field { min-width:0; margin:0; }
+    .library-booking-form .form-field label { font-size:9px; }
+    .library-booking-form input { min-height:38px; }
+    .library-booking-form button { min-height:38px; grid-column:1/-1; }
+    .library-booking-note { grid-column:1/-1; margin:0; color:var(--muted); font-size:9px; line-height:1.55; }
+    @media (max-width:760px) {
+      .library-booking { grid-template-columns:1fr; padding:15px; }
+    }
+    @media (max-width:480px) {
+      .library-booking-form { grid-template-columns:1fr; }
+      .library-booking-form button,.library-booking-note { grid-column:auto; }
+    }
+    .transport-hero { position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.3fr) minmax(150px,.7fr); align-items:center; gap:20px; margin:0 0 17px; padding:25px 28px; border-radius:19px; color:#fff; background:linear-gradient(115deg,#075e63,#168f91 62%,#55c9b5); }
+    .transport-hero:after { position:absolute; right:22px; top:-38px; color:#ffffff20; content:"↗"; font-size:190px; line-height:1; transform:rotate(-30deg); }
+    .transport-hero-copy { position:relative; z-index:1; }
+    .transport-hero-kicker { color:#d5fff7; font-size:9px; font-weight:850; letter-spacing:1.2px; }
+    .transport-hero h2 { margin:8px 0; font-size:clamp(23px,3vw,34px); line-height:1.15; letter-spacing:-.7px; }
+    .transport-hero p { max-width:540px; margin:0; color:#e0fff8; font-size:11px; line-height:1.7; }
+    .transport-hero-mark { position:relative; z-index:1; display:grid; place-items:center; justify-self:center; width:112px; height:112px; border:1px solid #ffffff50; border-radius:32px; background:#ffffff20; font-size:58px; box-shadow:0 14px 34px #06444833; animation:transportVehicleFloat 3s ease-in-out infinite; }
+    @keyframes transportVehicleFloat { 0%,100% { transform:translateY(0) rotate(-3deg); } 50% { transform:translateY(-7px) rotate(2deg); } }
+    .transport-info-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:17px; }
+    .transport-info-card { display:flex; align-items:flex-start; gap:11px; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .transport-info-icon { width:38px; height:38px; display:grid; place-items:center; flex:none; border-radius:12px; background:color-mix(in srgb,var(--teal) 12%,var(--surface)); font-size:18px; }
+    .transport-info-card strong { display:block; font-size:11px; }
+    .transport-info-card small { display:block; margin-top:3px; color:var(--muted); font-size:9px; line-height:1.5; }
+    .transport-content-grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(250px,.9fr); gap:15px; }
+    .transport-detail-card { padding:18px; border:1px solid var(--line); border-radius:16px; background:var(--surface); }
+    .transport-detail-card h3 { margin:0 0 5px; font-size:13px; }
+    .transport-detail-card > p { margin:0 0 13px; color:var(--muted); font-size:10px; line-height:1.65; }
+    .transport-route-list { display:grid; gap:10px; margin:0; padding:0; list-style:none; }
+    .transport-route-list li { display:grid; grid-template-columns:30px minmax(0,1fr); align-items:start; gap:10px; }
+    .transport-route-list li:before { display:grid; width:29px; height:29px; place-items:center; border-radius:9px; background:var(--blue-pale); color:var(--blue); content:"↗"; font-size:13px; font-weight:850; }
+    .transport-route-list strong { display:block; font-size:10px; }
+    .transport-route-list small { display:block; margin-top:2px; color:var(--muted); font-size:9px; line-height:1.55; }
+    .transport-callout { margin-top:13px; padding:10px 11px; border:1px solid color-mix(in srgb,var(--orange) 35%,var(--line)); border-radius:11px; background:color-mix(in srgb,var(--orange) 9%,var(--surface)); color:var(--muted); font-size:9px; line-height:1.6; }
+    .transport-contact-card { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin:15px 0; padding:18px; border:1px solid color-mix(in srgb,var(--teal) 25%,var(--line)); border-radius:16px; background:color-mix(in srgb,var(--teal) 7%,var(--surface)); }
+    .transport-contact-card strong { display:block; font-size:12px; }
+    .transport-contact-card p { margin:3px 0 0; color:var(--muted); font-size:10px; line-height:1.55; }
+    .transport-contact-card a { color:var(--blue); font-size:13px; font-weight:850; text-decoration:none; }
+    .transport-report-form { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .transport-report-form .form-field { min-width:0; margin:0; }
+    .transport-report-form .wide { grid-column:1/-1; }
+    .transport-report-form input,.transport-report-form select,.transport-report-form textarea { min-height:38px; }
+    .transport-report-form textarea { min-height:90px; }
+    .transport-report-form button,.transport-report-form .transport-report-note,.transport-report-form .transport-report-link { grid-column:1/-1; }
+    .transport-report-note { margin:0; color:var(--muted); font-size:9px; line-height:1.55; }
+    .transport-report-link { justify-self:start; }
+    .transport-report-link[hidden] { display:none; }
+    .transport-page-back { margin-bottom:13px; }
+    @media (max-width:760px) {
+      .transport-content-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:480px) {
+      .transport-hero { grid-template-columns:minmax(0,1fr) 76px; gap:9px; padding:19px; }
+      .transport-hero-mark { width:68px; height:68px; border-radius:20px; font-size:37px; }
+      .transport-hero:after { right:-17px; font-size:130px; }
+      .transport-info-grid { grid-template-columns:1fr; gap:8px; }
+      .transport-detail-card { padding:14px; }
+      .transport-report-form { grid-template-columns:1fr; }
+      .transport-report-form .wide,.transport-report-form button,.transport-report-form .transport-report-note,.transport-report-form .transport-report-link { grid-column:auto; }
+    }
+    .faq-list { display: grid; }
+    .faq-item { padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .faq-item:first-child { padding-top: 2px; }
+    .faq-item:last-child { padding-bottom: 0; border-bottom: 0; }
+    .faq-item summary { position: relative; padding-right: 22px; cursor: pointer; list-style: none; font-size: 11px; font-weight: 750; }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary:after { content: "+"; position: absolute; right: 2px; top: -3px; color: var(--blue); font-size: 18px; font-weight: 500; }
+    .faq-item[open] summary:after { content: "−"; }
+    .faq-item p { margin: 9px 18px 0 0; color: var(--muted); font-size: 10px; line-height: 1.7; }
+    .help-contact-list { display: grid; gap: 8px; }
+    .help-contact { display: grid; grid-template-columns: 38px minmax(0,1fr) auto; align-items: center; gap: 9px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .help-contact:last-child { border-bottom: 0; }
+    .help-contact .admin-icon { width: 36px; height: 36px; display: grid; place-items: center; margin: 0; border-radius: 11px; background: var(--blue-pale); font-size: 17px; }
+    .help-contact strong { display: block; font-size: 10px; }
+    .help-contact small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .help-contact .button-primary { padding: 7px 9px; }
+    .help-contact .contact-number { color: var(--muted); font-size: 9px; }
+    .help-contact a.button-primary { display: inline-flex; align-items: center; text-decoration: none; white-space: nowrap; }
+    .help-hours { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; }
+    .empty-state { padding: 30px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center; font-size: 12px; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 50; display: none; place-items: center; padding: 16px; background: #10172cb0; backdrop-filter: blur(4px); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(440px, 100%); max-height: 90vh; overflow-y: auto; padding: 22px; border: 1px solid var(--line); border-radius: 19px; background: var(--surface); box-shadow: 0 25px 80px #0e183544; animation: pageIn .25s ease; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 17px; }
+    .modal-head h2 { margin: 0; font-size: 17px; }
+    .close-button { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); }
+    .form-field { display: grid; gap: 6px; margin: 12px 0; }
+    .form-field label { font-size: 10px; font-weight: 750; }
+    .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px; outline: 0; background: var(--bg); color: var(--text); font-size: 11px; }
+    .form-field textarea { min-height: 78px; resize: vertical; }
+    .request-whatsapp-note { margin: 12px 0; padding: 10px 12px; border: 1px solid color-mix(in srgb,var(--teal) 25%,var(--line)); border-radius: 10px; background: color-mix(in srgb,var(--teal) 8%,var(--surface)); color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .request-whatsapp-note strong { color: var(--text); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 17px; }
+    .button-secondary { padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); font-size: 10px; font-weight: 700; }
+    .profile-backdrop { position: fixed; inset: 0; z-index: 55; visibility: hidden; background: #10172c80; opacity: 0; transition: opacity .25s,visibility .25s; }
+    .profile-backdrop.open { visibility: visible; opacity: 1; }
+    .profile-drawer { position: absolute; inset: 0 0 0 auto; width: min(440px,100%); overflow-y: auto; padding: 22px; background: var(--surface); box-shadow: -20px 0 65px #0e183533; transform: translateX(105%); transition: transform .42s cubic-bezier(.16,1,.3,1); }
+    .profile-backdrop.open .profile-drawer { transform: translateX(0); }
+    .profile-backdrop.open .profile-drawer > * { animation: profileItemIn .48s cubic-bezier(.16,1,.3,1) both; }
+    .profile-backdrop.open .profile-drawer > :nth-child(1) { animation-delay:.04s; }
+    .profile-backdrop.open .profile-drawer > :nth-child(2) { animation-delay:.09s; }
+    .profile-backdrop.open .profile-drawer > :nth-child(3) { animation-delay:.14s; }
+    .profile-backdrop.open .profile-drawer > :nth-child(4) { animation-delay:.19s; }
+    .profile-backdrop.open .profile-drawer > :nth-child(5) { animation-delay:.24s; }
+    .profile-backdrop.open .profile-drawer > :nth-child(6) { animation-delay:.29s; }
+    .profile-backdrop.open .profile-drawer > :nth-child(7) { animation-delay:.34s; }
+    @keyframes profileItemIn { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:translateX(0); } }
+    .profile-drawer-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+    .profile-drawer-head h2 { margin:0; font-size:18px; }
+    .profile-drawer-head p { margin:3px 0 0; color:var(--muted); font-size:10px; }
+    .profile-intro { display:flex; align-items:center; gap:14px; padding:15px; border:1px solid var(--line); border-radius:16px; background:linear-gradient(120deg,var(--blue-pale),var(--surface)); }
+    .profile-large-avatar { width:64px; height:64px; overflow:hidden; font-size:29px; }
+    .profile-intro strong { display:block; font-size:13px; overflow-wrap:anywhere; }
+    .profile-intro small { display:block; margin-top:3px; color:var(--muted); font-size:10px; overflow-wrap:anywhere; }
+    .avatar-trigger { cursor:pointer; }
+    .profile-large-avatar.avatar-trigger { padding:0; border:0; }
+    .profile-photo-menu { display:grid; gap:7px; margin-top:9px; padding:10px; border:1px solid var(--line); border-radius:13px; background:var(--surface-soft); animation:pageIn .2s ease both; }
+    .profile-photo-menu[hidden] { display:none; }
+    .profile-photo-menu button { width:100%; min-height:38px; text-align:left; }
+    .profile-section { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+    .profile-section h3 { margin:0 0 4px; font-size:12px; }
+    .profile-section > p { margin:0 0 10px; color:var(--muted); font-size:10px; line-height:1.55; }
+    .profile-photo-actions { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+    .profile-photo-actions button,.profile-section .button-primary,.profile-section .button-secondary { min-height:34px; }
+    .profile-form .form-field { margin:9px 0; }
+    .profile-notice { margin-top:10px; padding:9px 10px; border:1px solid color-mix(in srgb,var(--orange) 35%,var(--line)); border-radius:10px; background:color-mix(in srgb,var(--orange) 9%,var(--surface)); color:var(--muted); font-size:9px; line-height:1.55; }
+    .profile-message { min-height:18px; margin:9px 0 0; color:var(--teal); font-size:10px; line-height:1.5; overflow-wrap:anywhere; }
+    .profile-message.error { color:#b63838; }
+    .profile-account-actions { display:grid; gap:8px; }
+    .profile-account-actions button { width:100%; min-height:38px; text-align:left; }
+    .profile-account-actions .danger { border-color:#efc1c1; color:#b63838; }
+    .profile-account-actions .danger:hover { background:#fff1f1; }
+    #mobileProfileButton { display:none; }
+    @media (prefers-reduced-motion: reduce) {
+      .profile-backdrop { transition:opacity .16s ease,visibility .16s ease; }
+      .profile-drawer { transition:transform .18s ease-out; }
+      .profile-backdrop.open .profile-drawer > * { animation-duration:.18s; animation-delay:0s; }
+      @keyframes profileItemIn { from { opacity:.75; transform:translateX(6px); } to { opacity:1; transform:translateX(0); } }
+    }
+    .toast { position: fixed; z-index: 70; left: 50%; bottom: 24px; padding: 10px 15px; border-radius: 11px; background: #17213b; color: white; box-shadow: var(--shadow); opacity: 0; transform: translate(-50%, 14px); pointer-events: none; transition: .22s; font-size: 11px; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .companion-launch {
+      position: fixed; right: 24px; bottom: 24px; z-index: 40; min-height: 52px;
+      display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 9px;
+      border: 0; border-radius: 28px; color: #fff;
+      background: linear-gradient(135deg, #4568ed, #6e82f5);
+      box-shadow: 0 10px 28px #3456d94d; font-weight: 750; font-size: 12px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .companion-launch:hover { transform: translateY(-3px); box-shadow: 0 14px 32px #3456d95c; }
+    .companion-launch-icon { position: relative; width: 44px; height: 44px; display: grid; place-items: center; flex: none; border-radius: 50%; background: #ffffff22; }
+    .companion-launch-icon:after { content: ""; position: absolute; right: 0; bottom: 1px; width: 8px; height: 8px; border: 2px solid #536feb; border-radius: 50%; background: #70e0b0; }
+    .companion-mascot { width: 44px; height: 44px; overflow: visible; }
+    .mascot-float { transform-box: fill-box; transform-origin: center; animation: mascotFloat 2.3s ease-in-out infinite; }
+    .mascot-arm-left { transform-box: view-box; transform-origin: 17px 37px; animation: mascotArm 2.3s ease-in-out infinite; }
+    .mascot-arm-right { transform-box: view-box; transform-origin: 47px 37px; animation: mascotArm 2.3s ease-in-out infinite reverse; }
+    .mascot-eye { transform-box: fill-box; transform-origin: center; animation: mascotBlink 4.2s ease-in-out infinite; }
+    .mascot-mouth { transform-box: fill-box; transform-origin: center; }
+    .companion-mascot.is-talking .mascot-mouth { animation: mascotTalk .22s ease-in-out infinite alternate; }
+    .companion-mascot.is-thinking .mascot-float { animation-duration: .8s; }
+    .companion-mascot.is-waving .mascot-arm-right { animation: mascotWave .48s ease-in-out 4; }
+    @keyframes mascotFloat { 0%,100% { transform: translateY(1px) rotate(-2deg); } 50% { transform: translateY(-3px) rotate(2deg); } }
+    @keyframes mascotArm { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-9deg); } }
+    @keyframes mascotWave { 0%,100% { transform: rotate(0); } 45% { transform: rotate(-42deg); } 70% { transform: rotate(-24deg); } }
+    @keyframes mascotBlink { 0%,42%,46%,100% { transform: scaleY(1); } 44% { transform: scaleY(.12); } }
+    @keyframes mascotTalk { from { transform: scaleY(.55); } to { transform: scaleY(1.45); } }
+    .companion-panel {
+      position: fixed; right: 24px; bottom: 88px; z-index: 45;
+      width: min(390px, calc(100vw - 32px)); height: min(590px, calc(100dvh - 120px));
+      min-height: 390px; display: none; flex-direction: column; overflow: hidden;
+      border: 1px solid var(--line); border-radius: 21px; background: var(--surface);
+      box-shadow: 0 24px 75px #111b3c30; animation: pageIn .24s ease both;
+    }
+    .companion-panel.open { display: flex; }
+    .companion-head { display: flex; align-items: center; gap: 10px; padding: 14px 15px; border-bottom: 1px solid var(--line); }
+    .companion-avatar { position: relative; width: 44px; height: 44px; display: grid; place-items: center; flex: none; border-radius: 15px; background: linear-gradient(145deg, #dae4ff, #f0e9ff); }
+    .companion-avatar .companion-mascot { width: 42px; height: 42px; }
+    .companion-head-copy { min-width: 0; flex: 1; }
+    .companion-head-copy strong { display: block; font-size: 12px; }
+    .companion-head-copy small { display: block; color: var(--teal); font-size: 9px; }
+    .companion-head-actions { display: flex; gap: 5px; }
+    .companion-head-actions button { width: 31px; height: 31px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--muted); }
+    .companion-note { padding: 8px 13px; border-bottom: 1px solid var(--line); background: var(--surface-soft); color: var(--muted); text-align: center; font-size: 9px; }
+    .companion-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 9px; scroll-behavior: smooth; }
+    .companion-message { max-width: 88%; padding: 10px 12px; border-radius: 15px; background: var(--surface-soft); color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; line-height: 1.55; animation: messageIn .2s ease both; }
+    .companion-message.user { align-self: flex-end; border-bottom-right-radius: 5px; background: var(--blue); color: #fff; }
+    .companion-message.bot { border-bottom-left-radius: 5px; }
+    .companion-typing { display: none; color: var(--muted); font-size: 10px; }
+    .companion-typing.show { display: block; }
+    @keyframes messageIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .companion-prompts { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px 10px; border-top: 1px solid var(--line); scrollbar-width: none; }
+    .companion-prompts::-webkit-scrollbar { display: none; }
+    .companion-prompt { flex: none; padding: 6px 9px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--blue); font-size: 9px; }
+    .companion-form { display: flex; align-items: center; gap: 7px; padding: 10px 12px; border-top: 1px solid var(--line); }
+    .companion-form input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; outline: 0; background: var(--bg); color: var(--text); font-size: 11px; }
+    .companion-form input:focus { border-color: var(--blue); }
+    .companion-send { width: 37px; height: 37px; border: 0; border-radius: 12px; background: var(--blue); color: #fff; font-size: 17px; }
+    .mobile-brand, .mobile-nav { display: none; }
+    @media (max-width: 1100px) {
+      :root { --sidebar: 220px; }
+      .page { padding-right: 23px; padding-left: 23px; }
+      .topbar { padding: 0 23px; }
+      .stat-grid { gap: 9px; }
+      .stat-card { padding: 12px 10px; gap: 8px; }
+      .content-grid { grid-template-columns: minmax(0, 1.3fr) minmax(245px, .8fr); }
+      .course-catalog { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .lesson-layout { grid-template-columns: minmax(0,1fr) minmax(210px,.8fr); }
+    }
+    @media (max-width: 760px) {
+      :root { --sidebar: 0px; }
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding-bottom: 65px; }
+      .topbar { height: 61px; padding: 0 15px; }
+      .mobile-brand { display: flex; align-items: center; gap: 8px; font-weight: 850; font-size: 15px; }
+      .mobile-brand .crest { width: 33px; height: 33px; }
+      .auth-screen { padding:16px; }
+      .breadcrumb { display: none; }
+      .top-actions { margin-left: auto; }
+      #mobileProfileButton { display:grid; place-items:center; width:36px; height:36px; overflow:hidden; padding:0; border:1px solid var(--line); border-radius:50%; background:var(--surface); }
+      #mobileProfileButton .avatar { width:100%; height:100%; border-radius:50%; }
+      .search { width: min(190px, 44vw); height: 36px; }
+      .icon-button { width: 36px; height: 36px; }
+      .page { padding: 21px 15px 30px; }
+      .welcome { align-items: flex-start; }
+      .welcome h1 { font-size: 21px; }
+      .date-pill { font-size: 9px; }
+      .hero { min-height: 228px; padding: 24px; grid-template-columns: 1fr .6fr; }
+      .hero h2 { font-size: 26px; }
+      .campus-art { height: 160px; }
+      .stat-grid { grid-template-columns: repeat(2,1fr); }
+      .content-grid { grid-template-columns: 1fr; }
+      .library-content-grid { grid-template-columns:1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+      .admin-grid, .service-grid { grid-template-columns: repeat(2,1fr); }
+      .mobile-nav { position: fixed; z-index: 25; inset: auto 0 0; display: flex; justify-content: space-around; padding: 8px 4px max(8px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(14px); }
+      .mobile-nav button { min-width: 52px; display: grid; justify-items: center; gap: 2px; border: 0; background: none; color: var(--muted); font-size: 9px; }
+      .mobile-nav button.active { color: var(--blue); }
+      .mobile-nav .mobile-icon { font-size: 18px; line-height: 1.2; }
+      .companion-launch { right: 13px; bottom: 75px; min-height: 46px; padding-right: 13px; }
+      .companion-launch-icon { width: 40px; height: 40px; }
+      .companion-launch-icon .companion-mascot { width: 40px; height: 40px; }
+      .companion-panel { right: 10px; bottom: 132px; width: calc(100vw - 20px); height: min(570px, calc(100dvh - 160px)); min-height: 350px; }
+    }
+    @media (max-width: 480px) {
+      .top-actions { gap: 6px; }
+      .search { width: 36px; padding: 0 9px; border-color: transparent; background: var(--surface-soft); }
+      .search:focus-within { position: absolute; z-index: 3; left: 12px; right: 102px; width: auto; border-color: var(--blue); background: var(--surface); }
+      .search input { font-size: 11px; }
+      .hero { min-height: 220px; padding: 20px; grid-template-columns: 1fr; }
+      .hero h2 { max-width: 270px; font-size: 25px; }
+      .hero p { max-width: 260px; font-size: 10px; }
+      .campus-art { position: absolute; right: -53px; bottom: -12px; width: 190px; height: 150px; opacity: .4; }
+      .hero-copy { z-index: 2; }
+      .stat-card { padding: 10px; }
+      .stat-icon { width: 36px; height: 36px; font-size: 17px; }
+      .stat-card strong { font-size: 18px; }
+      .section-card { padding: 14px; }
+      .course-catalog { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .learning-hero { padding: 18px; }
+      .learning-hero h2 { font-size: 18px; }
+      .learning-hero-mark { margin-right: 4px; font-size: 39px; }
+      .learning-overview { gap: 7px; }
+      .learning-stat { padding: 9px 7px; gap: 7px; }
+      .learning-stat-icon { width: 29px; height: 29px; font-size: 14px; }
+      .learning-stat small { font-size: 8px; }
+      .learning-stat strong { font-size: 13px; }
+      .learning-toolbar { align-items: flex-start; flex-direction: column; }
+      .course-search { width: 100%; }
+      .detail-hero { grid-template-columns: 1fr; }
+      .detail-progress { width: 100%; }
+      .lesson-layout { grid-template-columns: 1fr; }
+      .lesson-sidebar { order: -1; }
+      .lesson-list { grid-template-columns: 1fr 1fr; }
+      .lesson-reader, .lesson-sidebar, .assignment-panel, .notes-panel { padding: 13px; }
+      .catalog-banner { min-height: 78px; font-size: 32px; }
+      .catalog-body { padding: 10px; }
+      .catalog-body h3 { font-size: 11px; }
+      .catalog-body p { min-height: 29px; font-size: 9px; }
+      .catalog-meta { align-items: flex-start; flex-direction: column; gap: 6px; }
+      .admin-grid, .service-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .admin-card, .service-card { padding: 13px; }
+      .admin-card p, .service-card p { min-height: 45px; }
+      .library-content-grid { grid-template-columns:1fr; }
+      .info-card { grid-template-columns: 56px minmax(0,1fr); gap: 10px; padding: 10px; }
+      .info-open-button { grid-template-columns:1fr; }
+      .info-read-more { justify-self:start; }
+      .info-date strong { font-size: 16px; }
+      .welcome { flex-direction: column; gap: 9px; }
+      .companion-panel { bottom: 128px; height: min(560px, calc(100dvh - 150px)); }
+      .library-hero { grid-template-columns:minmax(0,1fr) 76px; gap:9px; padding:19px; }
+      .library-hero-mark { width:68px; height:68px; border-radius:20px; font-size:37px; }
+      .library-hero:after { right:-17px; font-size:130px; }
+      .library-fact-grid { grid-template-columns:1fr; gap:8px; }
+      .library-detail-card { padding:14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *:before, *:after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .page.active { animation-duration: .65s !important; }
+      .page.active > * { animation-duration: .55s !important; }
+      .profile-backdrop { transition-duration:.16s !important; }
+      .profile-drawer { transition-duration:.18s !important; }
+      .profile-backdrop.open .profile-drawer > * { animation-duration:.18s !important; animation-delay:0s !important; }
+    }
+  </style>
+</head>
+<body>
+  <section class="auth-screen" id="authScreen" aria-labelledby="authTitle">
+    <div class="auth-card">
+      <div class="auth-brand"><span class="auth-brand-icon" aria-hidden="true">🎓</span><div><strong>Zhennusa</strong><small>SMART CAMPUS PORTAL</small></div></div>
+      <h1 id="authTitle">Masuk ke Zhennusa</h1>
+      <p class="auth-description" id="authDescription">Gunakan email dan kata sandi untuk melanjutkan belajar.</p>
+      <form class="auth-form" id="authForm">
+        <label class="auth-field" for="authEmail">Email<input id="authEmail" type="email" autocomplete="email" placeholder="nama@email.com" required></label>
+        <label class="auth-field" for="authPassword">Kata sandi<input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Minimal 6 karakter" required></label>
+        <div class="auth-confirm-wrap" id="authConfirmWrap" hidden><label class="auth-field" for="authConfirmPassword">Konfirmasi kata sandi<input id="authConfirmPassword" type="password" autocomplete="new-password" minlength="6" placeholder="Ulangi kata sandi"></label></div>
+        <button class="button-primary auth-submit" id="authSubmit" type="submit">Masuk</button>
+      </form>
+      <p class="auth-toggle"><span id="authToggleText">Belum punya akun?</span> <button id="authToggle" type="button">Buat akun</button></p>
+      <button class="button-secondary auth-demo" id="demoLogin" type="button">Masuk sebagai akun demo</button>
+      <p class="auth-demo-note" id="demoLoginNote">Buat akun dari sini untuk mencoba portal tanpa Firebase. Akun hanya tersimpan di browser ini dan tidak memverifikasi email; jangan gunakan kata sandi penting.</p>
+      <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
+      <p class="auth-config-note">Pendaftaran di halaman ini membuat akun lokal tanpa Firebase; akun dan kata sandinya hanya berlaku di browser ini. Akun Firebase yang sudah ada tetap bisa dicoba lewat formulir masuk.</p>
+    </div>
+  </section>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand" data-page="home" aria-label="Zhennusa, beranda">
+        <svg class="crest" viewBox="0 0 48 48" role="img" aria-label="Logo sekolah Zhennusa">
+          <g class="crest-shield"><path d="M24 3 42 10v12c0 11.6-7.5 18.8-18 23C13.5 40.8 6 33.6 6 22V10z" fill="#4568ed"/><path d="M24 7 38 12v10c0 9.2-5.8 15.1-14 18.7C15.8 37.1 10 31.2 10 22V12z" fill="#fff"/></g>
+          <g class="crest-book" fill="none" stroke="#4568ed" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19c4-1.6 7-.8 9 1.2 2-2 5-2.8 9-1.2v11c-4-1.6-7-.8-9 1.2-2-2-5-2.8-9-1.2z"/><path d="M24 20.5v10.7"/></g>
+          <path class="crest-star" d="m24 10 1.4 3.2 3.5.3-2.7 2.2.9 3.4-3.1-1.8-3.1 1.8.9-3.4-2.7-2.2 3.5-.3z" fill="#f3ae5b"/>
+        </svg>
+        <span class="brand-copy"><strong>Zhennusa</strong><small>SMART CAMPUS PORTAL</small></span>
+      </div>
+      <div class="nav-label">Menu utama</div>
+      <nav class="nav-list" aria-label="Menu utama">
+        <button class="nav-link active" data-page="home"><span class="nav-icon">⌂</span>Dashboard</button>
+        <button class="nav-link" data-page="learning"><span class="nav-icon">📚</span>Pembelajaran</button>
+        <button class="nav-link" data-page="administration"><span class="nav-icon">🗂️</span>Administrasi</button>
+        <button class="nav-link" data-page="information"><span class="nav-icon">📢</span>Informasi<span class="nav-count">3</span></button>
+        <button class="nav-link" data-page="services"><span class="nav-icon">🤝</span>Layanan kampus</button>
+        <button class="nav-link" data-page="help"><span class="nav-icon">💬</span>Pusat bantuan</button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="help-card"><strong>Butuh bantuan?</strong><p>Tim akademik siap membantu kebutuhanmu.</p><button data-page="help">Hubungi kami&nbsp; →</button></div>
+      <button class="user-chip" id="sidebarProfileButton" type="button" aria-label="Buka profil akun"><div class="avatar avatar-trigger" id="sidebarAvatar" aria-label="Ganti foto profil"><span class="profile-avatar-placeholder">👩🏻‍🎓</span><img class="profile-avatar-image" alt="" hidden></div><div><strong>Nadia Putri</strong><small>Siswa · Kelas XI-A</small></div><span style="margin-left:auto;color:var(--muted)">⌄</span></button>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="mobile-brand" data-page="home">
+          <svg class="crest" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 10v12c0 11.6-7.5 18.8-18 23C13.5 40.8 6 33.6 6 22V10z" fill="#4568ed"/><path d="M24 7 38 12v10c0 9.2-5.8 15.1-14 18.7C15.8 37.1 10 31.2 10 22V12z" fill="#fff"/><path d="M15 20c4-2 7-1 9 1 2-2 5-3 9-1v10c-4-2-7-1-9 1-2-2-5-3-9-1z" fill="none" stroke="#4568ed" stroke-width="2"/></svg>Zhennusa
+        </div>
+        <div class="breadcrumb">Portal Akademik&nbsp; / &nbsp;<strong id="breadcrumbCurrent">Dashboard</strong></div>
+        <div class="top-actions">
+          <div class="search-wrap"><label class="search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Cari kelas, info..." autocomplete="off"></label><div class="search-history" id="searchHistoryPanel" hidden></div></div>
+          <button class="icon-button" id="topTheme" aria-label="Ganti tema" title="Ganti tema">🌙</button>
+          <button class="icon-button" id="notificationsButton" aria-label="Notifikasi" title="Notifikasi">♧<span class="notification-dot"></span></button>
+          <button class="icon-button" data-page="help" aria-label="Pusat bantuan" title="Pusat bantuan">❔</button>
+          <button class="icon-button" id="logoutButton" aria-label="Keluar akun" title="Keluar">↪</button>
+          <button id="mobileProfileButton" type="button" aria-label="Ganti foto profil"><span class="avatar avatar-trigger"><span class="profile-avatar-placeholder">👩🏻‍🎓</span><img class="profile-avatar-image" alt="" hidden></span></button>
+        </div>
+      </header>
+
+      <main>
+        <section class="page active" id="page-home">
+          <div class="welcome"><div><h1>Selamat pagi, Nadia! <span aria-hidden="true">👋</span></h1><p>Siap belajar dan meraih hal hebat hari ini?</p></div><div class="date-pill" id="todayDate"></div></div>
+          <section class="hero">
+            <div class="hero-copy"><span class="hero-label">✦ &nbsp;SEMESTER GANJIL 2025/2026</span><h2>Belajar cerdas,<br>masa depan gemilang.</h2><p>Semua aktivitas belajar, informasi sekolah, dan layanan akademikmu dalam satu tempat.</p><button class="button-light" data-page="learning">Jelajahi pembelajaran &nbsp;→</button></div>
+            <div class="campus-art" aria-label="Ilustrasi sekolah Zhennusa yang beranimasi">
+              <svg class="campus-svg" viewBox="0 0 360 210" role="img" aria-label="Ilustrasi sekolah dengan pepohonan dan bendera">
+                <g class="campus-cloud" fill="#fff" opacity=".8"><path d="M45 51a14 14 0 0 1 27-4 12 12 0 0 1 19 10H45a8 8 0 0 1 0-6z"/></g>
+                <g class="campus-cloud delay" fill="#fff" opacity=".52"><path d="M270 36a11 11 0 0 1 21-3 10 10 0 0 1 16 8h-36a6 6 0 0 1-1-5z"/></g>
+                <path d="M35 173h292" stroke="#dbe5ff" stroke-width="3" stroke-linecap="round"/>
+                <g class="campus-building">
+                  <path d="M75 95 180 43l105 52" fill="#f7c66c" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+                  <path d="M91 93h178v78H91z" fill="#fff" stroke="#dce5ff" stroke-width="3"/>
+                  <path d="M163 114h34v57h-34z" fill="#4568ed"/>
+                  <path d="M105 111h24v23h-24zM231 111h24v23h-24zM105 144h24v20h-24zM231 144h24v20h-24z" fill="#aac6ff"/>
+                  <path d="M180 43v-24" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+                  <path class="campus-flag" d="M181 20h35l-9 9 9 9h-35z" fill="#ff8d8d"/>
+                  <path d="M166 93V72h28v21" fill="#f0b650"/>
+                  <path d="M40 172h280" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+                  <path d="M61 171c0-15 9-25 18-25s18 10 18 25M265 171c0-15 9-25 18-25s18 10 18 25" fill="#5ed0b0"/>
+                  <circle cx="75" cy="142" r="13" fill="#6cdaae"/><circle cx="286" cy="142" r="13" fill="#6cdaae"/>
+                </g>
+                <path class="hero-star" d="m313 80 3 7 7 1-5 5 1 7-6-4-6 4 2-7-6-5 8-1z" fill="#ffe38b"/>
+                <path class="hero-star" d="m49 104 2 5 5 1-4 4 1 5-4-3-5 3 2-5-4-4 5-1z" fill="#ffe38b" style="animation-delay:.9s"/>
+              </svg>
+            </div>
+          </section>
+          <section class="stat-grid" aria-label="Ringkasan akademik">
+            <article class="stat-card"><div class="stat-icon blue">📘</div><div><small>Kelas aktif</small><strong>6 <span class="trend">↗ semester ini</span></strong></div></article>
+            <article class="stat-card"><div class="stat-icon teal">✅</div><div><small>Tugas selesai</small><strong>18 <span class="trend">dari 22</span></strong></div></article>
+            <button class="stat-card stat-card-button" id="dashboardGradesButton" type="button" aria-label="Buka rangkuman nilai dan tes fokus"><div class="stat-icon orange">⭐</div><div><small>Rata-rata nilai · lihat rangkuman</small><strong id="dashboardAverageGrade">—</strong></div></button>
+            <article class="stat-card"><div class="stat-icon purple">🏅</div><div><small>Kehadiran</small><strong>96<span style="font-size:13px">%</span> <span class="trend">Sangat baik</span></strong></div></article>
+          </section>
+          <section class="content-grid">
+            <article class="section-card"><div class="section-heading"><div><h2>Lanjutkan belajar</h2><p>Progres kelas yang sedang kamu ikuti</p></div><button class="link-button" data-page="learning">Semua kelas&nbsp; →</button></div><div class="course-list" id="homeCourses"></div></article>
+            <article class="section-card"><div class="section-heading"><div><h2>Jadwal hari ini</h2><p id="todayScheduleDate"></p></div><button class="link-button" data-page="schedule">Lihat jadwal&nbsp; →</button></div><div class="schedule-list" id="dashboardScheduleList"></div></article>
+          </section>
+          <section class="bottom-grid">
+            <article class="section-card"><div class="section-heading"><div><h2>Informasi terbaru</h2><p>Pengumuman dari sekolah</p></div><button class="link-button" data-page="information">Lihat semua&nbsp; →</button></div><div class="announcement-list"><div class="announcement"><span class="announcement-mark">📣</span><div><strong>Pendaftaran kegiatan Porseni 2026 dibuka!</strong><small>Hari ini · Kesiswaan</small></div></div><div class="announcement"><span class="announcement-mark">🗓️</span><div><strong>Jadwal ujian tengah semester telah diperbarui</strong><small>Kemarin · Akademik</small></div></div><div class="announcement"><span class="announcement-mark">🌿</span><div><strong>Program Jumat Bersih dimulai pekan ini</strong><small>1 Nov 2026 · OSIS</small></div></div></div></article>
+            <article class="section-card"><div class="section-heading"><div><h2>Tugas yang akan datang</h2><p>Jangan lupa selesaikan tepat waktu</p></div><button class="link-button" data-page="learning">Lihat tugas&nbsp; →</button></div><div class="task-list" id="taskList"></div></article>
+          </section>
+          <footer style="margin-top:25px;color:var(--muted);text-align:center;font-size:9px">Zhennusa Smart Campus Portal · Belajar, bertumbuh, berprestasi ✨</footer>
+        </section>
+
+        <section class="page" id="page-learning">
+          <div id="learningCatalogView">
+            <div class="learning-hero"><div class="learning-hero-copy"><span class="learning-kicker">RUANG BELAJAR ZHENNUSA</span><h2>Belajar sedikit demi sedikit,<br>maju setiap hari.</h2><p>Pilih kelas, pelajari materi, dan pantau progresmu di sini.</p></div><div class="learning-hero-mark" aria-hidden="true">📚</div></div>
+            <div class="learning-overview">
+              <article class="learning-stat"><span class="learning-stat-icon">📖</span><div><small>Kelas diikuti</small><strong id="learningClassCount">9 kelas</strong></div></article>
+              <article class="learning-stat"><span class="learning-stat-icon">✅</span><div><small>Materi diselesaikan</small><strong id="learningDoneCount">0 materi</strong></div></article>
+              <article class="learning-stat"><span class="learning-stat-icon">🎯</span><div><small>Progres keseluruhan</small><strong id="learningOverallProgress">0%</strong></div></article>
+            </div>
+            <div class="learning-toolbar"><div><h2>Jelajahi kelas</h2><p>Pilih kelas untuk membuka materi dan tugas</p><button class="link-button" data-page="academic-results">Lihat nilai & hasil akademik →</button></div><label class="course-search"><span>⌕</span><input id="courseSearch" type="search" placeholder="Cari mata pelajaran atau guru..."></label></div>
+            <div class="filter-row learning-filter-row" id="courseFilters"><button class="filter-chip active" data-filter="Semua">Semua kelas</button><button class="filter-chip" data-filter="Sains">Sains</button><button class="filter-chip" data-filter="Bahasa">Bahasa</button><button class="filter-chip" data-filter="Sosial">Sosial</button><button class="filter-chip" data-filter="Matematika">Matematika</button></div>
+            <div class="course-catalog" id="courseCatalog"></div>
+          </div>
+          <section class="course-detail" id="courseDetail">
+            <div class="course-detail-top"><button class="course-back" id="backToCourses" aria-label="Kembali ke daftar kelas">←</button><div><small>Pembelajaran / <strong id="detailBreadcrumb">Kelas</strong></small></div></div>
+            <div class="detail-hero" id="detailHero"></div>
+            <div class="course-tabs" role="tablist" aria-label="Bagian kelas">
+              <button class="course-tab active" role="tab" aria-selected="true" data-course-tab="materials">📚 Materi</button>
+              <button class="course-tab" role="tab" aria-selected="false" data-course-tab="assignments">📝 Tugas</button>
+              <button class="course-tab" role="tab" aria-selected="false" data-course-tab="notes">✏️ Catatan</button>
+            </div>
+            <div class="course-tab-panel active" id="courseMaterialsPanel">
+              <div class="lesson-layout"><article class="lesson-reader" id="lessonReader"></article><aside class="lesson-sidebar"><h3>Daftar materi</h3><div class="lesson-list" id="lessonList"></div></aside></div>
+            </div>
+            <div class="course-tab-panel" id="courseAssignmentsPanel"><article class="assignment-panel"><h3>Tugas kelas</h3><p class="page-description" style="margin:-6px 0 6px">Unggah foto hasil tugas untuk mengirimkannya otomatis kepada guru melalui WhatsApp.</p><div id="assignmentList"></div></article></div>
+            <div class="course-tab-panel" id="courseNotesPanel"><article class="notes-panel"><h3>Catatan belajarku</h3><p class="page-description" style="margin:-6px 0 11px">Catatan tersimpan otomatis di perangkat ini.</p><textarea id="courseNotes" maxlength="5000" placeholder="Tulis rangkuman atau hal penting dari kelas ini..."></textarea><div class="notes-toolbar"><div class="notes-status" id="notesStatus">Belum ada catatan.</div><button class="button-primary notes-download" id="downloadCourseNotes" type="button" disabled>⬇ Unduh .txt</button></div></article></div>
+          </section>
+
+          <section class="focus-work-view focus-protected" id="focusWorkView" aria-hidden="true" aria-label="Sesi pengerjaan materi">
+            <header class="focus-work-topbar">
+              <div class="focus-brand"><span class="focus-brand-mark">📘</span><span>Zhennusa<small>Mode pengerjaan fokus</small></span></div>
+              <div class="focus-clock"><span class="focus-clock-icon">◷</span><div><span class="focus-clock-label">SISA WAKTU</span><strong id="focusTimer">30:00</strong></div></div>
+              <div class="focus-top-actions"><button class="button-secondary" id="focusFullscreen" type="button">⛶ Layar penuh</button><button class="button-secondary" data-focus-action="exit" type="button">Akhiri sesi</button></div>
+            </header>
+            <main class="focus-work-main" id="focusQuizView">
+              <div class="focus-course-line"><span id="focusCourseIcon">📚</span><strong id="focusCourseName">Kelas</strong><span>·</span><span id="focusLessonNumber">Materi</span></div>
+              <div class="focus-notice"><span>🔒</span><span>Mode fokus aktif · Berpindah tab akan menjeda dan mengunci sesi sampai kamu kembali.</span></div>
+              <article class="focus-question-card">
+                <div class="focus-progress-row"><span id="focusQuestionCounter">Soal 1 dari 30</span><strong>Kerjakan dengan mandiri</strong></div>
+                <div class="progress-track" style="margin:0 0 19px"><div class="progress-value" id="focusProgressBar" style="width:0%"></div></div>
+                <div class="focus-question-nav" id="focusQuestionNav" aria-label="Navigasi soal"></div>
+                <div class="focus-nav-legend" aria-label="Keterangan status soal"><span><i></i>Terjawab</span><span><i class="skipped-dot"></i>Dilewati</span></div>
+                <h1 id="focusTopic">Latihan Matematika</h1>
+                <p class="focus-intro">Pilih satu jawaban terbaik · Jawaban tersimpan otomatis.</p>
+                <div class="focus-material" id="focusMaterial"></div>
+                <div class="focus-question" id="focusQuestion"></div>
+                <div class="focus-answers" id="focusAnswers" role="radiogroup" aria-label="Pilihan jawaban"></div>
+                <div class="focus-feedback" id="focusFeedback" aria-live="polite"></div>
+                <div class="focus-footer"><button class="button-secondary" data-focus-action="previous" type="button">← Sebelumnya</button><small>Jawaban tersimpan otomatis di perangkat ini.</small><div><button class="button-secondary" data-focus-action="next" type="button">Berikutnya →</button><button class="button-primary" data-focus-action="finish" type="button">Selesaikan ✓</button></div></div>
+              </article>
+            </main>
+            <main class="focus-work-main focus-result-view" id="focusResultView" hidden aria-labelledby="focusResultTitle">
+              <section class="focus-result-hero">
+                <h1 id="focusResultTitle">Hasil sesi fokus</h1>
+                <p id="focusResultSummary"></p>
+                <div class="focus-result-score" id="focusResultScore"></div>
+              </section>
+              <section aria-labelledby="focusReviewHeading">
+                <h2 id="focusReviewHeading">Pembahasan jawaban</h2>
+                <div id="focusResultQuestions"></div>
+              </section>
+              <button class="button-primary focus-result-back" id="focusResultBack" type="button">← Kembali ke pembelajaran</button>
+            </main>
+            <div class="focus-confirm" id="focusConfirm" role="alertdialog" aria-modal="true" aria-labelledby="focusConfirmTitle" aria-describedby="focusConfirmMessage" hidden>
+              <div class="focus-confirm-card">
+                <div class="focus-confirm-icon" aria-hidden="true">📝</div>
+                <h2 id="focusConfirmTitle">Selesaikan sesi?</h2>
+                <p id="focusConfirmMessage"></p>
+                <div class="focus-confirm-actions"><button class="button-secondary" data-focus-confirm="cancel" type="button">Lanjut mengerjakan</button><button class="button-primary" data-focus-confirm="accept" type="button">Ya, selesaikan</button></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page" id="page-schedule">
+          <button class="link-button" data-page="home" type="button">← Kembali ke beranda</button>
+          <h1 class="page-title">Jadwal pelajaran</h1>
+          <p class="page-description">Pilih hari untuk melihat jadwal kelas Senin sampai Sabtu.</p>
+          <div class="schedule-week-tabs" id="scheduleWeekTabs" role="tablist" aria-label="Pilih hari jadwal"></div>
+          <article class="section-card">
+            <h2 class="schedule-day-heading" id="scheduleDayHeading"></h2>
+            <div class="schedule-page-list" id="schedulePageList"></div>
+          </article>
+        </section>
+
+        <section class="page" id="page-administration">
+          <h1 class="page-title">Administrasi akademik</h1><p class="page-description">Akses dokumen, pembayaran, dan urusan akademik dalam satu portal.</p>
+          <div class="admin-grid">
+            <article class="admin-card"><div class="admin-icon">📄</div><h3>Surat & dokumen</h3><p>Ajukan surat keterangan siswa, surat aktif, atau legalisir dokumen.</p><button class="button-primary" data-modal="document">Ajukan dokumen</button></article>
+            <article class="admin-card"><div class="admin-icon">💳</div><h3>Tagihan sekolah</h3><p>Pantau tagihan dan riwayat pembayaran sekolah.</p><button class="button-primary" data-modal="payment">Lihat tagihan</button></article>
+            <article class="admin-card"><div class="admin-icon">📝</div><h3>Data akademik</h3><p>Lihat nilai dari semua mata pelajaran, hasil sesi fokus, dan ringkasan progres akademik.</p><button class="button-primary" id="gradesButton">Lihat semua nilai</button></article>
+          </div>
+          <article class="section-card" style="margin-top:18px"><div class="section-heading"><div><h2>Riwayat pengajuan</h2><p>Status dokumen dan layanan yang kamu ajukan</p></div><button class="link-button" data-modal="document">+ Pengajuan baru</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Jenis pengajuan</th><th>Tanggal</th><th>Nomor referensi</th><th>Status</th></tr></thead><tbody id="requestRows"><tr><td>Surat keterangan siswa</td><td>28 Okt 2026</td><td>EDU-261028</td><td><span class="status">Selesai</span></td></tr><tr><td>Legalisir rapor</td><td>30 Okt 2026</td><td>EDU-261030</td><td><span class="status wait">Diproses</span></td></tr></tbody></table></div></article>
+        </section>
+
+        <section class="page" id="page-academic-results">
+          <button class="link-button" data-page="administration">← Kembali ke administrasi akademik</button>
+          <h1 class="page-title" style="margin-top:12px">Data akademik</h1>
+          <p class="page-description">Rangkuman nilai sesi fokus dari seluruh mata pelajaran, jumlah benar dan salah, serta total hasil per bulan.</p>
+          <div class="academic-summary-grid" id="academicSummary"></div>
+          <article class="section-card" style="margin-bottom:14px">
+            <div class="section-heading"><div><h2>Rangkuman tes fokus per bulan</h2><p>Total nilai dan hasil tes fokus yang tersimpan, dikelompokkan berdasarkan bulan.</p></div></div>
+            <div class="academic-month-list" id="academicMonthlyList"></div>
+          </article>
+          <article class="section-card">
+            <div class="section-heading"><div><h2>Nilai semua mata pelajaran</h2><p>Menampilkan nilai terbaru dan seluruh riwayat tes fokus tiap kelas.</p></div></div>
+            <div class="academic-course-list" id="academicCourseList"></div>
+          </article>
+          <p class="page-description" style="margin-top:12px">Mata pelajaran tanpa nilai berarti belum ada tes fokus yang tercatat. Riwayat hanya mencakup tes yang tersimpan di browser/perangkat ini sejak pencatatan aktif; nilai lama tidak tersedia otomatis.</p>
+        </section>
+
+        <section class="page" id="page-information">
+          <h1 class="page-title">Informasi & pengumuman</h1><p class="page-description">Informasi terbaru untuk siswa, orang tua, dan seluruh warga sekolah.</p>
+          <div class="filter-row" id="infoFilters"><button class="filter-chip active" data-info-filter="Semua">Semua informasi</button><button class="filter-chip" data-info-filter="Akademik">Akademik</button><button class="filter-chip" data-info-filter="Kesiswaan">Kesiswaan</button><button class="filter-chip" data-info-filter="Kegiatan">Kegiatan</button></div>
+          <div class="information-list" id="informationList"></div>
+        </section>
+
+        <section class="page" id="page-announcement-detail">
+          <button class="link-button announcement-detail-back" id="announcementBackButton" type="button">← Kembali ke semua informasi</button>
+          <article class="announcement-detail-hero">
+            <div class="announcement-detail-meta"><span class="announcement-category" id="announcementDetailCategory"></span><time id="announcementDetailDate"></time></div>
+            <div class="announcement-detail-icon" id="announcementDetailIcon" aria-hidden="true"></div>
+            <h1 id="announcementDetailTitle"></h1>
+            <p class="announcement-detail-body" id="announcementDetailBody"></p>
+          </article>
+          <article class="announcement-detail-content">
+            <h2>Artikel pengumuman</h2>
+            <div class="announcement-detail-article" id="announcementDetailArticle"></div>
+            <h2>Informasi penting</h2>
+            <ul class="announcement-detail-list" id="announcementDetailItems"></ul>
+          </article>
+        </section>
+
+        <section class="page" id="page-services">
+          <h1 class="page-title">Layanan sekolah</h1><p class="page-description">Butuh bantuan? Pilih layanan yang kamu perlukan, kami siap membantu.</p>
+          <div class="service-grid">
+            <article class="service-card"><div class="admin-icon">🧑‍🏫</div><h3>Konsultasi akademik</h3><p>Buat janji dengan guru BK atau wali kelas untuk berdiskusi.</p><button class="button-primary" data-modal="consult">Buat janji</button></article>
+            <article class="service-card"><div class="admin-icon">🏥</div><h3>UKS & kesehatan</h3><p>Informasi kesehatan siswa dan layanan ruang kesehatan sekolah.</p><button class="button-primary" data-modal="health">Hubungi UKS</button></article>
+            <article class="service-card"><div class="admin-icon">🚌</div><h3>Transportasi</h3><p>Informasi layanan antar-jemput dan cara menyampaikan pengaduan atau saran.</p><button class="button-primary" data-page="transport">Lihat informasi lengkap</button></article>
+            <article class="service-card"><div class="admin-icon">📚</div><h3>Perpustakaan</h3><p>Jam layanan, informasi peminjaman, dan panduan berkunjung.</p><button class="button-primary" data-page="library">Lihat informasi lengkap</button></article>
+            <article class="service-card"><div class="admin-icon">💻</div><h3>Bantuan IT</h3><p>Kesulitan akses akun belajar atau menggunakan portal?</p><button class="button-primary" data-modal="it">Minta bantuan</button></article>
+            <article class="service-card"><div class="admin-icon">💬</div><h3>Hubungi sekolah</h3><p>Kirim pertanyaan atau masukan kepada tim administrasi.</p><button class="button-primary" data-modal="contact">Kirim pesan</button></article>
+          </div>
+          <article class="section-card" style="margin-top:18px"><div class="section-heading"><div><h2>Jam layanan</h2><p>Jadwal operasional unit sekolah</p></div></div><div class="schedule-list"><div class="schedule-item"><span class="schedule-time">07:00</span><span class="schedule-bar"></span><div><strong>Administrasi sekolah</strong><small>Senin–Jumat · sampai 15:00</small></div></div><div class="schedule-item"><span class="schedule-time">08:00</span><span class="schedule-bar teal"></span><div><strong>Perpustakaan</strong><small>Senin–Jumat · sampai 16:00</small></div></div><div class="schedule-item"><span class="schedule-time">08:00</span><span class="schedule-bar orange"></span><div><strong>Konseling siswa</strong><small>Senin–Jumat · berdasarkan janji</small></div></div></div></article>
+        </section>
+
+        <section class="page" id="page-library">
+          <button class="link-button library-page-back" data-page="services">← Kembali ke layanan sekolah</button>
+          <section class="library-hero">
+            <div class="library-hero-copy"><span class="library-hero-kicker">RUANG BACA ZHENNUSA</span><h2>Temukan ruang untuk membaca, belajar, dan bertumbuh.</h2><p>Perpustakaan sekolah menyediakan tempat belajar yang tenang dan koleksi bacaan untuk mendukung kegiatan akademik. Tanyakan ketersediaan buku langsung kepada petugas.</p></div>
+            <div class="library-hero-mark" aria-hidden="true">📚</div>
+          </section>
+          <div class="library-fact-grid" aria-label="Informasi utama perpustakaan">
+            <article class="library-fact"><span class="library-fact-icon">🕗</span><div><strong>Senin–Jumat</strong><small>08:00–16:00 · sesuai jadwal layanan</small></div></article>
+            <article class="library-fact"><span class="library-fact-icon">📖</span><div><strong>Maksimal 3 buku</strong><small>Batas peminjaman per siswa</small></div></article>
+            <article class="library-fact"><span class="library-fact-icon">📅</span><div><strong>Masa pinjam 7 hari</strong><small>Kembalikan sesuai tanggal yang dicatat petugas</small></div></article>
+          </div>
+          <div class="library-content-grid">
+            <article class="library-detail-card">
+              <h3>Cara meminjam buku</h3><p>Datang ke perpustakaan pada jam layanan dan ikuti proses berikut bersama petugas.</p>
+              <ol class="library-steps">
+                <li><div><strong>Cari koleksi yang dibutuhkan</strong><small>Jelajahi rak atau tanyakan kepada petugas tentang buku yang sesuai.</small></div></li>
+                <li><div><strong>Serahkan buku dan kartu pelajar</strong><small>Petugas membantu mencatat peminjaman dan tanggal pengembalian.</small></div></li>
+                <li><div><strong>Simpan tanggal kembali</strong><small>Masa pinjam yang tercantum pada informasi layanan adalah 7 hari.</small></div></li>
+                <li><div><strong>Kembalikan ke petugas</strong><small>Serahkan buku secara langsung agar pengembalian dapat dicatat.</small></div></li>
+              </ol>
+            </article>
+            <article class="library-detail-card">
+              <h3>Ketentuan & etika ruang baca</h3><p>Agar koleksi tetap terawat dan semua siswa nyaman belajar:</p>
+              <ul class="library-policy-list">
+                <li>Maksimal peminjaman 3 buku per siswa.</li>
+                <li>Masa peminjaman buku adalah 7 hari.</li>
+                <li>Jaga kebersihan dan kembalikan buku ke petugas setelah dibaca.</li>
+                <li>Gunakan suara pelan dan hormati pengunjung lain.</li>
+                <li>Laporkan buku rusak atau kendala peminjaman kepada petugas.</li>
+              </ul>
+              <div class="library-note">Informasi jam, jumlah buku, dan masa pinjam mengikuti keterangan layanan yang tersedia di portal. Konfirmasikan perubahan jadwal atau ketersediaan koleksi langsung kepada petugas perpustakaan.</div>
+            </article>
+          </div>
+          <section class="library-booking" aria-labelledby="libraryBookingTitle">
+            <div class="library-booking-copy"><h3 id="libraryBookingTitle">Booking buku sebelum datang</h3><p>Tulis nama dan judul buku. Pesan akan disiapkan ke WhatsApp layanan sekolah agar petugas perpustakaan dapat mengecek ketersediaan. Tunggu konfirmasi sebelum mengambil buku.</p></div>
+            <form class="library-booking-form" id="libraryBookingForm">
+              <div class="form-field"><label for="libraryBookingName">Nama siswa</label><input id="libraryBookingName" name="studentName" type="text" maxlength="80" autocomplete="name" placeholder="Nama lengkap" required></div>
+              <div class="form-field"><label for="libraryBookingBook">Judul buku</label><input id="libraryBookingBook" name="bookTitle" type="text" maxlength="120" placeholder="Buku yang ingin dipinjam" required></div>
+              <button class="button-primary" type="submit">📲 Hubungi petugas & booking</button>
+              <a class="button-secondary library-booking-link" id="libraryBookingLink" target="_blank" rel="noopener noreferrer" hidden>Buka WhatsApp untuk mengirim booking ↗</a>
+              <p class="library-booking-note">WhatsApp akan terbuka dengan pesan terisi. Periksa lalu tekan Kirim. Booking belum dikonfirmasi sampai petugas membalas. Bawa kartu pelajar saat mengambil buku.</p>
+            </form>
+          </section>
+          <article class="library-detail-card" style="margin-top:15px">
+            <h3>Butuh rekomendasi atau bantuan?</h3><p>Petugas perpustakaan dapat membantu menemukan koleksi, menjelaskan tata cara peminjaman, dan menjawab pertanyaan tentang layanan.</p>
+            <button class="button-primary" data-page="services">Lihat kontak layanan sekolah</button>
+          </article>
+        </section>
+
+        <section class="page" id="page-transport">
+          <button class="link-button transport-page-back" data-page="services">← Kembali ke layanan sekolah</button>
+          <section class="transport-hero">
+            <div class="transport-hero-copy"><span class="transport-hero-kicker">LAYANAN ANTAR-JEMPUT ZHENNUSA</span><h2>Perjalanan sekolah yang tertib dan aman.</h2><p>Informasi layanan transportasi sekolah gratis, rute, jadwal, dan kanal untuk menyampaikan pengaduan atau saran.</p></div>
+            <div class="transport-hero-mark" aria-hidden="true">🚌</div>
+          </section>
+          <div class="transport-info-grid" aria-label="Informasi layanan transportasi">
+            <article class="transport-info-card"><span class="transport-info-icon">📍</span><div><strong>Rute & cakupan</strong><small>Konfirmasi area jemput dan titik pemberhentian kepada petugas sekolah.</small></div></article>
+            <article class="transport-info-card"><span class="transport-info-icon">🎉</span><div><strong>Biaya layanan</strong><small>Gratis · tidak dipungut biaya.</small></div></article>
+            <article class="transport-info-card"><span class="transport-info-icon">🛡️</span><div><strong>Keselamatan perjalanan</strong><small>Ikuti arahan pengemudi dan gunakan sabuk pengaman jika tersedia.</small></div></article>
+          </div>
+          <div class="transport-content-grid">
+            <article class="transport-detail-card">
+              <h3>Informasi yang perlu dikonfirmasi</h3><p>Rute, titik jemput, jadwal, dan ketersediaan tempat dapat berubah. Hubungi sekolah sebelum mendaftar atau mengandalkan layanan untuk perjalanan.</p>
+              <ul class="transport-route-list">
+                <li><div><strong>Rute antar-jemput</strong><small>Berikan area atau patokan lokasi secara umum; petugas akan mengonfirmasi apakah rute tersedia.</small></div></li>
+                <li><div><strong>Jadwal berangkat dan pulang</strong><small>Tanyakan waktu penjemputan, titik kumpul, dan prosedur jika terlambat atau jadwal berubah.</small></div></li>
+                <li><div><strong>Pendaftaran dan kapasitas</strong><small>Konfirmasikan prosedur pendaftaran, ketersediaan tempat, serta ketentuan layanan kepada administrasi. Layanan ini gratis.</small></div></li>
+                <li><div><strong>Perubahan atau pembatalan</strong><small>Segera beri tahu petugas jika alamat, jadwal, atau kebutuhan antar-jemput berubah.</small></div></li>
+              </ul>
+              <div class="transport-callout">Layanan antar-jemput ini gratis. Portal belum menampilkan daftar rute atau jadwal rinci; hubungi petugas untuk memastikan cakupan rute dan waktu penjemputan terbaru.</div>
+            </article>
+            <article class="transport-detail-card">
+              <h3>Tips perjalanan aman</h3><p>Untuk membantu perjalanan berjalan tertib:</p>
+              <ul class="library-policy-list">
+                <li>Tunggu di titik jemput yang telah disepakati dengan orang tua dan petugas.</li>
+                <li>Datang tepat waktu dan ikuti arahan pengemudi atau pendamping.</li>
+                <li>Jangan mengganggu pengemudi saat kendaraan berjalan.</li>
+                <li>Laporkan barang tertinggal, keterlambatan, atau kondisi kendaraan kepada petugas.</li>
+                <li>Untuk keadaan darurat, segera beri tahu orang dewasa tepercaya dan pihak sekolah secara langsung.</li>
+              </ul>
+            </article>
+          </div>
+          <article class="transport-detail-card">
+            <h3>Kirim pengaduan atau saran</h3><p>Sertakan informasi secukupnya agar petugas memahami masalahnya. Hindari mengirim alamat lengkap, kata sandi, atau data pribadi yang tidak diperlukan.</p>
+            <form class="transport-report-form" id="transportReportForm">
+              <div class="form-field"><label for="transportReportName">Nama siswa</label><input id="transportReportName" name="studentName" type="text" maxlength="80" autocomplete="name" placeholder="Nama lengkap" required></div>
+              <div class="form-field"><label for="transportReportType">Jenis pesan</label><select id="transportReportType" name="reportType" required><option value="Pengaduan">Pengaduan masalah</option><option value="Saran">Saran perbaikan</option><option value="Pertanyaan">Pertanyaan layanan</option></select></div>
+              <div class="form-field wide"><label for="transportReportRoute">Rute atau area (opsional)</label><input id="transportReportRoute" name="route" type="text" maxlength="100" placeholder="Contoh: area atau nama titik jemput, tanpa alamat lengkap"></div>
+              <div class="form-field wide"><label for="transportReportDetails">Pesan</label><textarea id="transportReportDetails" name="details" maxlength="1000" placeholder="Jelaskan masalah atau saran, termasuk hari/jam kejadian bila relevan." required></textarea></div>
+              <button class="button-primary" type="submit">📲 Siapkan pesan WhatsApp</button>
+              <a class="button-secondary transport-report-link" id="transportReportLink" target="_blank" rel="noopener noreferrer" hidden>Buka WhatsApp untuk mengirim ↗</a>
+              <p class="transport-report-note">Formulir ini menyiapkan draf pesan, bukan mengirim laporan otomatis. Periksa draf lalu tekan Kirim di WhatsApp. Jika WhatsApp tidak terbuka, gunakan tautan yang muncul.</p>
+            </form>
+          </article>
+        </section>
+
+        <section class="page" id="page-help">
+          <h1 class="page-title">Pusat bantuan</h1><p class="page-description">Temukan jawaban cepat atau hubungi tim Zhennusa untuk bantuan lebih lanjut.</p>
+          <div class="content-grid">
+            <article class="section-card">
+              <div class="section-heading"><div><h2>Pertanyaan yang sering ditanyakan</h2><p>Panduan singkat menggunakan portal sekolah</p></div></div>
+              <div class="faq-list">
+                <details class="faq-item"><summary>Bagaimana cara melihat jadwal dan kelas saya?</summary><p>Buka menu <strong>Pembelajaran</strong> untuk melihat daftar kelas serta progres materi. Jadwal hari ini tersedia di halaman Dashboard.</p></details>
+                <details class="faq-item"><summary>Di mana saya bisa mengajukan surat keterangan?</summary><p>Buka menu <strong>Administrasi</strong>, pilih “Ajukan dokumen”, lalu isi jenis dokumen dan informasi yang diminta. Status pengajuan akan muncul di riwayat pengajuan.</p></details>
+                <details class="faq-item"><summary>Saya lupa kata sandi atau tidak bisa masuk</summary><p>Untuk menjaga keamanan akun, silakan hubungi petugas IT atau administrasi sekolah secara langsung. Jangan membagikan kata sandi melalui chat.</p></details>
+                <details class="faq-item"><summary>Bagaimana cara menghubungi guru BK?</summary><p>Buka <strong>Layanan sekolah</strong> lalu pilih “Konsultasi akademik” untuk mengajukan jadwal dengan guru BK atau wali kelas.</p></details>
+                <details class="faq-item"><summary>Data di portal ini tidak sesuai, harus bagaimana?</summary><p>Hubungi bagian administrasi sekolah dan sertakan nama serta bagian informasi yang perlu diperbaiki. Hindari mengirim data pribadi sensitif melalui formulir umum.</p></details>
+              </div>
+            </article>
+            <article class="section-card">
+              <div class="section-heading"><div><h2>Masih perlu bantuan?</h2><p>Pilih kanal yang paling sesuai</p></div></div>
+              <div class="help-contact-list">
+                <div class="help-contact"><span class="admin-icon">🧑‍💻</span><div><strong>Bantuan teknis</strong><small>Akun, akses portal, atau masalah teknis</small></div><button class="button-primary" data-modal="it">Hubungi</button></div>
+                <div class="help-contact"><span class="admin-icon">🗂️</span><div><strong>Administrasi</strong><small>Surat, pembayaran, dan data akademik</small></div><button class="button-primary" data-page="administration">Buka</button></div>
+                <div class="help-contact"><span class="admin-icon">🤝</span><div><strong>Layanan sekolah</strong><small>Konseling, UKS, dan perpustakaan</small></div><button class="button-primary" data-page="services">Buka</button></div>
+                <div class="help-contact"><span class="admin-icon">🤖</span><div><strong>TemanNusa</strong><small>Pendamping belajar untuk ngobrol</small></div><button class="button-primary" id="helpCompanion">Chat</button></div>
+              </div>
+              <p class="help-hours">Tim sekolah melayani Senin–Jumat, pukul 07:00–15:00.</p>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Navigasi bawah">
+    <button class="active" data-page="home"><span class="mobile-icon">⌂</span>Beranda</button>
+    <button data-page="learning"><span class="mobile-icon">📚</span>Belajar</button>
+    <button data-page="administration"><span class="mobile-icon">🗂️</span>Admin</button>
+    <button data-page="information"><span class="mobile-icon">📢</span>Info</button>
+    <button data-page="services"><span class="mobile-icon">🤝</span>Layanan</button>
+  </nav>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal"><div class="modal-head"><h2 id="modalTitle">Formulir layanan</h2><button class="close-button" id="closeModal" aria-label="Tutup">✕</button></div><div id="modalBody"></div></div>
+  </div>
+  <div class="profile-backdrop" id="profileBackdrop" aria-hidden="true">
+    <aside class="profile-drawer" id="profileDrawer" role="dialog" aria-modal="true" aria-labelledby="profileTitle" tabindex="-1">
+      <header class="profile-drawer-head"><div><h2 id="profileTitle">Profil & akun</h2><p>Kelola informasi akun Zhennusa</p></div><button class="close-button" id="closeProfile" type="button" aria-label="Tutup profil">✕</button></header>
+      <div class="profile-intro">
+        <button class="avatar profile-large-avatar avatar-trigger" id="profileAvatarButton" type="button" aria-label="Pilih tindakan foto profil" aria-expanded="false"><span class="profile-avatar-placeholder">👩🏻‍🎓</span><img class="profile-avatar-image" alt="" hidden></button>
+        <div><strong id="profileDisplayName">Akun</strong><small id="profileEmail">email</small></div>
+      </div>
+      <div class="profile-photo-menu" id="profilePhotoMenu" hidden>
+        <button class="button-secondary" id="chooseProfilePhoto" type="button">🖼️ Pilih dari galeri</button>
+        <button class="button-secondary" id="captureProfilePhoto" type="button">📷 Ambil foto</button>
+        <button class="button-secondary" id="removeProfilePhoto" type="button">Hapus foto</button>
+      </div>
+      <input id="profileGalleryInput" type="file" accept="image/*" hidden>
+      <input id="profileCameraInput" type="file" accept="image/*" capture="user" hidden>
+      <form class="profile-form profile-section" id="profileDetailsForm">
+        <h3>Informasi profil</h3><p>Nama dan foto profil disimpan di browser perangkat ini.</p>
+        <div class="form-field"><label for="profileNameInput">Nama tampilan</label><input id="profileNameInput" type="text" maxlength="40" autocomplete="name" required></div>
+        <button class="button-primary" type="submit">Simpan profil</button>
+      </form>
+      <form class="profile-form profile-section" id="changeEmailForm">
+        <h3>Ganti Gmail</h3><p id="changeEmailDescription">Firebase akan mengirim tautan konfirmasi ke alamat email baru.</p>
+        <div class="form-field"><label for="newAccountEmail">Gmail baru</label><input id="newAccountEmail" type="email" autocomplete="email" placeholder="nama@gmail.com" required></div>
+        <button class="button-primary" type="submit">Kirim tautan verifikasi</button>
+      </form>
+      <form class="profile-form profile-section" id="resetPasswordForm">
+        <h3>Ganti kata sandi</h3><p id="resetPasswordDescription">Alur OTP Gmail yang diminta masih berupa rancangan dan belum aktif.</p>
+        <div class="form-field"><label for="passwordOtpPreview">Kode OTP Gmail (6 digit)</label><input id="passwordOtpPreview" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="OTP belum tersedia" disabled></div>
+        <button class="button-secondary" type="button" disabled>Verifikasi OTP · perlu backend</button>
+        <p style="margin-top:12px">Alternatif yang bisa digunakan sekarang: kirim tautan reset resmi Firebase ke email akun.</p>
+        <button class="button-secondary" type="submit">Kirim tautan reset kata sandi</button>
+        <div class="profile-notice">Firebase Email/Password tidak menyediakan OTP angka untuk reset kata sandi. OTP angka memerlukan backend tepercaya untuk mengirim dan memverifikasinya; jangan membuat OTP hanya di browser.</div>
+      </form>
+      <p class="profile-message" id="profileMessage" role="status" aria-live="polite"></p>
+      <section class="profile-section">
+        <h3>Keamanan akun</h3><p>Berpindah akun akan mengakhiri sesi ini.</p>
+        <div class="profile-account-actions">
+          <button class="button-secondary" id="switchAccountButton" type="button">⇄ Ganti akun</button>
+          <button class="button-secondary" id="profileLogoutButton" type="button">↪ Keluar dari akun</button>
+          <button class="button-secondary danger" id="deleteAccountButton" type="button">⌫ Hapus akun</button>
+        </div>
+      </section>
+    </aside>
+  </div>
+  <div class="focus-lock" id="focusLock" role="alertdialog" aria-modal="true" aria-labelledby="focusLockTitle" hidden>
+    <div class="focus-lock-card"><div class="focus-lock-icon">⏸️</div><h2 id="focusLockTitle">Sesi dijeda</h2><p id="focusLockMessage">Sesi pengerjaan dijeda karena halaman tidak aktif. Waktu tidak dihitung selama jeda.</p><button class="button-primary" data-resume-focus type="button">Saya kembali, lanjutkan</button><small class="focus-warning-count" id="focusWarningCount"></small></div>
+  </div>
+  <button class="companion-launch" id="companionLaunch" aria-label="Buka TemanNusa, pendamping belajar" aria-expanded="false">
+    <span class="companion-launch-icon" aria-hidden="true">
+      <svg class="companion-mascot" viewBox="0 0 64 64">
+        <g class="mascot-float">
+          <path d="M32 9V5" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="4" r="3" fill="#ffd46a" class="hero-star"/>
+          <g class="mascot-arm-left"><path d="M15 35 9 39" stroke="#e4ecff" stroke-width="6" stroke-linecap="round"/><circle cx="9" cy="39" r="3.5" fill="#ffd0b6"/></g>
+          <g class="mascot-arm-right"><path d="m49 35 6 4" stroke="#e4ecff" stroke-width="6" stroke-linecap="round"/><circle cx="55" cy="39" r="3.5" fill="#ffd0b6"/></g>
+          <rect x="14" y="12" width="36" height="31" rx="13" fill="#fff" stroke="#dbe4ff" stroke-width="2"/>
+          <rect x="19" y="18" width="26" height="17" rx="8" fill="#eaf0ff"/>
+          <g class="mascot-eye" fill="#4568ed"><ellipse cx="26" cy="26" rx="2.3" ry="3"/><ellipse cx="38" cy="26" rx="2.3" ry="3"/></g>
+          <path class="mascot-mouth" d="M28 31q4 4 8 0" fill="none" stroke="#f08c89" stroke-width="2" stroke-linecap="round"/>
+          <path d="M22 44h20l4 9H18z" fill="#91a8ff"/>
+          <circle cx="32" cy="48" r="2" fill="#fff4b8"/>
+          <path d="M25 54v4m14-4v4" stroke="#e4ecff" stroke-width="5" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </span><span>TemanNusa</span>
+  </button>
+  <section class="companion-panel" id="companionPanel" aria-label="Chat TemanNusa" aria-hidden="true">
+    <header class="companion-head">
+      <div class="companion-avatar" aria-hidden="true">
+        <svg class="companion-mascot" viewBox="0 0 64 64">
+          <g class="mascot-float">
+            <path d="M32 9V5" stroke="#4568ed" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="4" r="3" fill="#f3ae5b"/>
+            <g class="mascot-arm-left"><path d="M15 35 9 39" stroke="#91a8ff" stroke-width="6" stroke-linecap="round"/><circle cx="9" cy="39" r="3.5" fill="#ffd0b6"/></g>
+            <g class="mascot-arm-right"><path d="m49 35 6 4" stroke="#91a8ff" stroke-width="6" stroke-linecap="round"/><circle cx="55" cy="39" r="3.5" fill="#ffd0b6"/></g>
+            <rect x="14" y="12" width="36" height="31" rx="13" fill="#fff" stroke="#dbe4ff" stroke-width="2"/>
+            <rect x="19" y="18" width="26" height="17" rx="8" fill="#eaf0ff"/>
+            <g class="mascot-eye" fill="#4568ed"><ellipse cx="26" cy="26" rx="2.3" ry="3"/><ellipse cx="38" cy="26" rx="2.3" ry="3"/></g>
+            <path class="mascot-mouth" d="M28 31q4 4 8 0" fill="none" stroke="#f08c89" stroke-width="2" stroke-linecap="round"/>
+            <path d="M22 44h20l4 9H18z" fill="#91a8ff"/><circle cx="32" cy="48" r="2" fill="#f3ae5b"/>
+            <path d="M25 54v4m14-4v4" stroke="#91a8ff" stroke-width="5" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="companion-head-copy"><strong>TemanNusa</strong><small>● Pendamping belajar siap menemani</small></div>
+      <div class="companion-head-actions"><button id="clearCompanion" aria-label="Mulai percakapan baru" title="Percakapan baru">↻</button><button id="closeCompanion" aria-label="Tutup chat">✕</button></div>
+    </header>
+    <div class="companion-note">Versi demo lokal · Jangan kirim kata sandi atau data pribadi</div>
+    <div class="companion-messages" id="companionMessages" aria-live="polite"></div>
+    <div class="companion-typing" id="companionTyping">TemanNusa sedang mengetik…</div>
+    <div class="companion-prompts" id="companionPrompts">
+      <button class="companion-prompt" data-companion-prompt="Bantu aku bikin rencana belajar">🗓️ Rencana belajar</button>
+      <button class="companion-prompt" data-companion-prompt="Aku merasa stres dengan tugas sekolah">💙 Aku lagi stres</button>
+      <button class="companion-prompt" data-companion-prompt="Jelaskan cara belajar yang fokus">🎯 Biar fokus</button>
+      <button class="companion-prompt" data-companion-prompt="Bantu aku memahami Matematika">📚 Bantu belajar</button>
+    </div>
+    <form class="companion-form" id="companionForm">
+      <input id="companionInput" type="text" maxlength="500" placeholder="Ceritakan yang ingin kamu bicarakan…" autocomplete="off" aria-label="Pesan untuk TemanNusa">
+      <button class="companion-send" type="submit" aria-label="Kirim pesan">↑</button>
+    </form>
+  </section>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const firebaseApiKey="AIzaSyBMx4h0QngZ_Vhh_qyxyKfrnSZFPbQsssQ";
+    const schoolWhatsAppNumber="6282341049502";
+    const assignmentSubmissionEndpoint="/api/assignments/submit";
+    const courses = [
+      {name:"Matematika",teacher:"Bu Rina Kusuma",category:"Matematika",group:"Sains",icon:"📐",style:"math",progress:72,lessons:18,done:13,topics:["Mengenal fungsi kuadrat","Faktorisasi dan akar persamaan","Grafik parabola"],assignment:"Latihan soal persamaan kuadrat",quiz:{question:"Akar-akar dari x² − 5x + 6 = 0 adalah…",options:["2 dan 3","−2 dan −3","1 dan 6"],answer:0}},
+      {name:"Biologi",teacher:"Pak Arif Wicaksono",category:"Sains",group:"Sains",icon:"🧬",style:"science",progress:58,lessons:16,done:9,topics:["Struktur dan fungsi sel","Transportasi membran","Jaringan pada makhluk hidup"],assignment:"Laporan praktikum fotosintesis",quiz:{question:"Organel yang berperan utama menghasilkan energi bagi sel adalah…",options:["Mitokondria","Ribosom","Badan Golgi"],answer:0}},
+      {name:"Bahasa Inggris",teacher:"Miss Clara Dewi",category:"Bahasa",group:"Bahasa",icon:"🌎",style:"language",progress:84,lessons:14,done:12,topics:["Simple present tense","Descriptive text","Everyday conversations"],assignment:"Esai: My future ambition",quiz:{question:"Choose the correct sentence: “She ___ to school every day.”",options:["go","goes","going"],answer:1}},
+      {name:"Fisika",teacher:"Bu Maya Lestari",category:"Sains",group:"Sains",icon:"⚛️",style:"science",progress:45,lessons:20,done:9,topics:["Besaran dan satuan","Gerak lurus beraturan","Kecepatan dan percepatan"],assignment:"Latihan gerak lurus",quiz:{question:"Sebuah benda menempuh 100 meter dalam 20 detik. Berapa kelajuannya?",options:["5 m/s","20 m/s","80 m/s"],answer:0}},
+      {name:"Sejarah Indonesia",teacher:"Pak Budi Santoso",category:"Sosial",group:"Sosial",icon:"🏛️",style:"language",progress:63,lessons:12,done:8,topics:["Pergerakan nasional","Persiapan kemerdekaan","Proklamasi Indonesia"],assignment:"Linimasa menuju kemerdekaan",quiz:{question:"Proklamasi Kemerdekaan Indonesia dibacakan pada…",options:["17 Agustus 1945","20 Mei 1908","10 November 1945"],answer:0}},
+      {name:"Bahasa Indonesia",teacher:"Bu Sari Handayani",category:"Bahasa",group:"Bahasa",icon:"✍️",style:"math",progress:91,lessons:11,done:10,topics:["Teks eksplanasi","Kalimat efektif","Menyusun argumen"],assignment:"Tulis teks eksplanasi singkat",quiz:{question:"Teks eksplanasi bertujuan untuk…",options:["Menjelaskan proses terjadinya suatu fenomena","Menceritakan pengalaman pribadi","Mengajak pembaca membeli sesuatu"],answer:0}},
+      {name:"Kimia",teacher:"Pak Dimas Pratama",category:"Sains",group:"Sains",icon:"🧪",style:"science",progress:38,lessons:18,done:7,topics:["Struktur atom","Konfigurasi elektron","Sistem periodik unsur"],assignment:"Latihan konfigurasi elektron",quiz:{question:"Nomor atom suatu unsur menunjukkan jumlah…",options:["Proton dalam inti atom","Neutron dan elektron","Kulit elektron"],answer:0}},
+      {name:"Ekonomi",teacher:"Bu Tania Putri",category:"Sosial",group:"Sosial",icon:"📊",style:"math",progress:67,lessons:15,done:10,topics:["Kebutuhan dan kelangkaan","Permintaan dan penawaran","Keseimbangan pasar"],assignment:"Analisis sederhana harga pasar",quiz:{question:"Jika harga barang naik, jumlah barang yang diminta biasanya…",options:["Menurun","Meningkat tanpa batas","Tetap selalu sama"],answer:0}},
+      {name:"Informatika",teacher:"Pak Reza Mahendra",category:"Sains",group:"Sains",icon:"💻",style:"language",progress:55,lessons:14,done:8,topics:["Berpikir komputasional","Algoritma dan diagram alir","Dasar pemrograman"],assignment:"Buat algoritma aktivitas harian",quiz:{question:"Algoritma adalah…",options:["Urutan langkah logis untuk menyelesaikan masalah","Bahasa khusus untuk mendesain gambar","Kumpulan data tanpa aturan"],answer:0}}
+    ];
+    const weekdayNames=["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+    const weeklySchedule={
+      Senin:[["07:30","Matematika","Bu Rina Kusuma","Ruang 11-A",""],["09:15","Biologi","Pak Arif Wicaksono","Lab IPA","teal"],["11:00","Bahasa Inggris","Miss Clara Dewi","Ruang 11-A","orange"],["13:00","Sejarah Indonesia","Pak Budi Santoso","Ruang 11-A","purple"]],
+      Selasa:[["07:30","Fisika","Bu Maya Lestari","Lab Fisika",""],["09:15","Bahasa Indonesia","Bu Sari Handayani","Ruang 11-A","teal"],["11:00","Kimia","Pak Dimas Pratama","Lab Kimia","orange"],["13:00","Ekonomi","Bu Tania Putri","Ruang 11-A","purple"]],
+      Rabu:[["07:30","Matematika","Bu Rina Kusuma","Ruang 11-A",""],["09:15","Informatika","Pak Reza Mahendra","Lab Komputer","teal"],["11:00","Biologi","Pak Arif Wicaksono","Lab IPA","orange"],["13:00","Bahasa Inggris","Miss Clara Dewi","Ruang 11-A","purple"]],
+      Kamis:[["07:30","Kimia","Pak Dimas Pratama","Lab Kimia",""],["09:15","Fisika","Bu Maya Lestari","Lab Fisika","teal"],["11:00","Sejarah Indonesia","Pak Budi Santoso","Ruang 11-A","orange"],["13:00","Bahasa Indonesia","Bu Sari Handayani","Ruang 11-A","purple"]],
+      Jumat:[["07:30","Bahasa Inggris","Miss Clara Dewi","Ruang 11-A",""],["09:15","Ekonomi","Bu Tania Putri","Ruang 11-A","teal"],["11:00","Matematika","Bu Rina Kusuma","Ruang 11-A","orange"],["13:00","Biologi","Pak Arif Wicaksono","Lab IPA","purple"]],
+      Sabtu:[["08:00","Informatika","Pak Reza Mahendra","Lab Komputer",""],["09:30","Kimia","Pak Dimas Pratama","Lab Kimia","teal"],["11:00","Proyek lintas mata pelajaran","Guru pendamping","Ruang 11-A","orange"]]
+    };
+    const upcomingTasks = [
+      {title:"Latihan soal persamaan kuadrat",courseName:"Matematika",due:"Besok, 4 Nov"},
+      {title:"Laporan praktikum fotosintesis",courseName:"Biologi",due:"6 Nov 2026"},
+      {title:"Esai: My future ambition",courseName:"Bahasa Inggris",due:"8 Nov 2026"}
+    ];
+    const focusDurationMs=30*60*1000;
+    const mathFocusQuestions=[
+      {question:"Akar-akar dari x² − 5x + 6 = 0 adalah…",options:["2 dan 3","−2 dan −3","1 dan 6","−1 dan −6"],answer:0},
+      {question:"Bentuk faktor dari x² + 7x + 12 adalah…",options:["(x + 3)(x + 4)","(x − 3)(x − 4)","(x + 2)(x + 6)","(x − 2)(x + 6)"],answer:0},
+      {question:"Diskriminan dari x² − 4x + 4 = 0 adalah…",options:["0","4","8","16"],answer:0},
+      {question:"Titik puncak grafik y = (x − 2)² + 3 adalah…",options:["(2, 3)","(−2, 3)","(2, −3)","(3, 2)"],answer:0},
+      {question:"Jika f(x) = x² − 3x + 2, nilai f(4) adalah…",options:["6","4","8","10"],answer:0},
+      {question:"Sumbu simetri y = x² + 6x + 5 adalah…",options:["x = −3","x = 3","x = −6","x = 6"],answer:0},
+      {question:"Nilai minimum y = x² − 8x + 12 adalah…",options:["−4","−12","4","12"],answer:0},
+      {question:"Persamaan kuadrat yang akarnya 1 dan 5 adalah…",options:["x² − 6x + 5 = 0","x² + 6x + 5 = 0","x² − 4x + 5 = 0","x² + 4x − 5 = 0"],answer:0},
+      {question:"Grafik y = −2x² + 3x + 1 membuka ke arah…",options:["Bawah","Atas","Kanan","Kiri"],answer:0},
+      {question:"Akar-akar x² − 9 = 0 adalah…",options:["−3 dan 3","−9 dan 9","0 dan 9","−3 dan 0"],answer:0},
+      {question:"Hasil kali akar-akar x² + 2x − 15 = 0 adalah…",options:["−15","2","15","−2"],answer:0},
+      {question:"Jumlah akar-akar 2x² − 6x + 1 = 0 adalah…",options:["3","−3","−6","6"],answer:0},
+      {question:"Jika x² = 49, nilai x yang memenuhi adalah…",options:["−7 atau 7","7 saja","−7 saja","49 atau −49"],answer:0},
+      {question:"Bentuk kuadrat sempurna dari x² + 10x + 25 adalah…",options:["(x + 5)²","(x − 5)²","(x + 10)²","(x − 25)²"],answer:0},
+      {question:"Nilai diskriminan x² + 2x + 5 = 0 menunjukkan persamaan memiliki…",options:["Tidak ada akar real","Dua akar real berbeda","Satu akar real kembar","Dua akar real nol"],answer:0},
+      {question:"Nilai y = x² − 4x + 1 saat x = 2 adalah…",options:["−3","3","1","−1"],answer:0},
+      {question:"Titik potong grafik y = x² − 4 dengan sumbu-x adalah…",options:["(−2, 0) dan (2, 0)","(0, −2) dan (0, 2)","(−4, 0) dan (4, 0)","(0, −4) saja"],answer:0},
+      {question:"Jika salah satu akar x² − 7x + 10 = 0 adalah 2, akar lainnya adalah…",options:["5","−5","7","10"],answer:0},
+      {question:"Nilai maksimum y = −x² + 6x − 5 adalah…",options:["4","−4","5","9"],answer:0},
+      {question:"Koefisien x² pada 3x² − 5x + 2 = 0 adalah…",options:["3","−5","2","1"],answer:0},
+      {question:"Hasil pemfaktoran x² − 16 adalah…",options:["(x − 4)(x + 4)","(x − 8)(x + 2)","(x − 4)²","(x + 4)²"],answer:0},
+      {question:"Jika f(x) = 2x² + x − 3, nilai f(−1) adalah…",options:["−2","0","2","4"],answer:0},
+      {question:"Sumbu simetri grafik y = 2x² − 12x + 7 adalah…",options:["x = 3","x = −3","x = 6","x = −6"],answer:0},
+      {question:"Persamaan x² + 4x + 4 = 0 memiliki akar…",options:["−2 kembar","2 dan −2","4 dan 1","2 kembar"],answer:0},
+      {question:"Jika grafik y = ax² + bx + c membuka ke atas, maka…",options:["a > 0","a < 0","b > 0","c < 0"],answer:0},
+      {question:"Nilai diskriminan x² − 2x − 8 = 0 adalah…",options:["36","−36","28","32"],answer:0},
+      {question:"Akar-akar x² + x − 12 = 0 adalah…",options:["3 dan −4","−3 dan 4","2 dan −6","−2 dan 6"],answer:0},
+      {question:"Titik puncak y = x² + 2x − 3 memiliki ordinat…",options:["−4","−3","−1","4"],answer:0},
+      {question:"Jika akar-akar persamaan kuadrat berjumlah 6 dan hasil kalinya 8, persamaannya adalah…",options:["x² − 6x + 8 = 0","x² + 6x + 8 = 0","x² − 8x + 6 = 0","x² + 8x − 6 = 0"],answer:0},
+      {question:"Grafik y = x² + 1 memotong sumbu-y di titik…",options:["(0, 1)","(1, 0)","(0, −1)","(−1, 0)"],answer:0}
+    ];
+    const buildFocusQuestions=rows=>rows.map(([question,correct,...wrong])=>({question,options:[correct,...wrong],answer:0}));
+    const focusQuestionBanks={
+      "Matematika":mathFocusQuestions,
+      "Biologi":buildFocusQuestions([
+        ["Unit terkecil penyusun makhluk hidup adalah…","Sel","Jaringan","Organ","Sistem organ"],
+        ["Organel penghasil energi melalui respirasi sel adalah…","Mitokondria","Ribosom","Badan Golgi","Lisosom"],
+        ["Tempat utama fotosintesis pada sel tumbuhan adalah…","Kloroplas","Vakuola","Nukleus","Sentriol"],
+        ["Organel yang menyimpan materi genetik sel adalah…","Nukleus","Ribosom","Membran sel","Dinding sel"],
+        ["Ribosom berfungsi dalam proses…","Sintesis protein","Respirasi","Pencernaan intrasel","Fotosintesis"],
+        ["Membran sel bersifat selektif permeabel, artinya…","Mengatur zat yang masuk dan keluar","Menghasilkan semua energi sel","Menyimpan seluruh DNA","Membentuk jaringan"],
+        ["Organel yang memodifikasi dan mengemas protein adalah…","Badan Golgi","Kloroplas","Sentriol","Vakuola"],
+        ["Lisosom terutama berperan untuk…","Pencernaan intrasel","Menyimpan air","Membentuk glukosa","Mengatur pembelahan"],
+        ["Dinding sel tumbuhan terutama tersusun atas…","Selulosa","Kitin","Glikogen","Kolesterol"],
+        ["Cairan tempat organel berada di dalam sel disebut…","Sitoplasma","Kromosom","Membran inti","Matriks tulang"],
+        ["Perpindahan air melalui membran semipermeabel disebut…","Osmosis","Difusi terfasilitasi","Transkripsi","Eksositosis"],
+        ["Difusi merupakan perpindahan partikel dari…","Konsentrasi tinggi ke rendah","Konsentrasi rendah ke tinggi dengan ATP","Dalam sel ke inti saja","Cairan ke padatan saja"],
+        ["Transpor aktif memerlukan…","Energi ATP","Cahaya matahari selalu","Tidak membutuhkan membran","Klorofil"],
+        ["Protein kanal membran membantu…","Difusi terfasilitasi","Replikasi DNA","Fotosintesis","Pembentukan jaringan"],
+        ["Sel tumbuhan dalam larutan hipertonik akan mengalami…","Plasmolisis","Turgid","Pembelahan biner","Lisis karena air masuk"],
+        ["Larutan isotonik menyebabkan…","Tidak ada perpindahan netto air","Air hanya masuk ke sel","Air hanya keluar dari sel","Membran sel larut"],
+        ["Pompa natrium-kalium termasuk transpor…","Aktif","Pasif","Osmosis","Difusi sederhana"],
+        ["Endositosis adalah proses…","Memasukkan zat dengan membentuk vesikel","Mengeluarkan zat lewat vesikel","Memindahkan air tanpa membran","Membuat protein di ribosom"],
+        ["Eksositosis digunakan sel untuk…","Mengeluarkan zat melalui vesikel","Memasukkan air secara osmosis","Membelah inti","Menghasilkan ATP"],
+        ["Jika sel hewan berada di larutan hipotonik, air cenderung…","Masuk ke dalam sel","Keluar dari sel","Tidak bergerak sama sekali","Berubah menjadi protein"],
+        ["Sekumpulan sel sejenis yang bekerja sama membentuk…","Jaringan","Organisme","Sistem organ","Organel"],
+        ["Jaringan xilem berfungsi mengangkut…","Air dan mineral dari akar","Hasil fotosintesis ke daun saja","Oksigen ke seluruh tubuh hewan","Hormon ke stomata"],
+        ["Jaringan floem mengangkut…","Hasil fotosintesis","Air dari tanah ke akar","Karbon dioksida ke akar","Mineral ke rambut akar saja"],
+        ["Jaringan epitel pada hewan berfungsi utama untuk…","Melapisi dan melindungi permukaan","Menghantarkan impuls","Menggerakkan tulang","Menyimpan mineral"],
+        ["Jaringan saraf tersusun terutama untuk…","Menerima dan menghantarkan impuls","Mengangkut air","Menyimpan lemak saja","Membentuk epidermis tumbuhan"],
+        ["Jaringan otot mampu…","Berkontraksi untuk menghasilkan gerak","Mengangkut hasil fotosintesis","Menyerap air tanah","Membentuk kutikula"],
+        ["Organ tersusun dari…","Beberapa jenis jaringan yang bekerja sama","Satu jenis molekul saja","Beberapa sistem organ","Organel yang tidak berhubungan"],
+        ["Stomata pada daun berperan dalam…","Pertukaran gas dan pengaturan penguapan","Penyerapan mineral dari tanah","Mengangkut gula ke akar","Membentuk biji"],
+        ["Meristem adalah jaringan tumbuhan yang aktif…","Membelah untuk pertumbuhan","Mengangkut hasil fotosintesis","Melindungi daun dari penguapan","Menyimpan udara di paru-paru"],
+        ["Urutan organisasi tubuh dari sederhana ke kompleks adalah…","Sel–jaringan–organ–sistem organ","Organ–sel–jaringan–organisme","Jaringan–sel–organisme–organ","Sel–organ–organel–jaringan"]
+      ]),
+      "Bahasa Inggris":buildFocusQuestions([
+        ["Choose the correct sentence: She ___ to school every day.","goes","go","going","gone"],
+        ["The simple present is commonly used for…","Habits and general facts","An action happening only right now","A completed past action","A future plan with a fixed date"],
+        ["Choose the correct negative: He ___ like spicy food.","does not","do not","is not","are not"],
+        ["Choose the correct question: ___ they play basketball on Fridays?","Do","Does","Are","Is"],
+        ["The third-person singular form of “study” is…","studies","studys","studyies","studied"],
+        ["Which sentence expresses a general truth?","Water boils at 100°C at sea level.","I am eating lunch now.","We visited Bali yesterday.","She will call tonight."],
+        ["Complete: My brother ___ TV after dinner.","watches","watch","watching","watched"],
+        ["Choose the correct adverb: Lina speaks English…","fluently","fluent","fluency","more fluent"],
+        ["Which is a frequency adverb?","usually","beautiful","careful","yesterday"],
+        ["Complete: The sun ___ in the east.","rises","rise","rising","rose"],
+        ["A descriptive text mainly aims to…","Describe a particular person, place, or thing","Explain steps to make something","Retell a sequence of past events","Persuade readers to buy a product"],
+        ["The identification part of a descriptive text…","Introduces the specific subject","Lists the writer’s arguments","Gives a set of instructions","Explains the ending of a story"],
+        ["Which adjective best describes “a very old building”?","ancient","quickly","build","between"],
+        ["Choose the correct phrase: ___ blue eyes.","She has","She have","She is have","She having"],
+        ["Which sentence describes appearance?","He is tall and has curly hair.","He goes to school by bus.","He studied last night.","He will arrive tomorrow."],
+        ["A suitable adjective for a friendly person is…","kind","kindly","kindness","kinderly"],
+        ["Descriptive texts often use…","Simple present tense and adjectives","Only future perfect tense","Commands in every sentence","Past continuous exclusively"],
+        ["Which sentence describes a place?","The garden is quiet and full of colorful flowers.","Please open the garden gate.","We went to the garden yesterday.","I will plant flowers tomorrow."],
+        ["Choose the correct possessive: This is ___ classroom.","their","they","them","theirs are"],
+        ["Which word is a sensory adjective?","fragrant","arrived","because","between"],
+        ["At a café, a polite way to order is…","Could I have a glass of water, please?","Give water now!","You are water.","Where water yesterday?"],
+        ["A suitable response to “How are you?” is…","I’m fine, thank you.","At seven o’clock.","It is mine.","Turn left."],
+        ["Complete the offer: “Would you like some tea?” — “___”","Yes, please.","I am tea.","No, I would.","Tea likes you."],
+        ["To ask someone to repeat, say…","Could you say that again, please?","You repeat me now.","What repeat yesterday?","Say again you."],
+        ["The suitable response to “Thank you” is…","You’re welcome.","Good night.","Excuse me?","Never mind you."],
+        ["Choose the polite request…","Would you mind helping me?","Help me, you must.","You helping now?","I help you yesterday."],
+        ["Complete: “Where is the library?” — “___”","It is next to the school office.","I am reading a book.","It opens yesterday.","Because it is quiet."],
+        ["To introduce yourself, you can say…","My name is Rani. Nice to meet you.","What your name yesterday?","I name Rani is.","Nice meeting your name."],
+        ["Which expression is used to apologize?","I’m sorry for being late.","Congratulations on your success.","Have a nice weekend.","You’re welcome."],
+        ["A suitable closing after a conversation is…","It was nice talking to you. See you later.","What are you talking?","I am talk later.","Talked nice to you."]
+      ]),
+      "Fisika":buildFocusQuestions([
+        ["Satuan SI untuk panjang adalah…","meter","kilogram","sekon","kelvin"],
+        ["Satuan SI untuk massa adalah…","kilogram","meter","ampere","newton"],
+        ["Alat yang tepat untuk mengukur diameter kawat tipis adalah…","Mikrometer sekrup","Termometer","Stopwatch","Neraca pegas"],
+        ["Besaran pokok waktu memiliki satuan SI…","sekon","meter","joule","watt"],
+        ["Kelompok yang seluruhnya besaran pokok SI adalah…","Panjang, massa, waktu","Gaya, energi, daya","Kecepatan, luas, volume","Tekanan, usaha, suhu"],
+        ["Hasil pengukuran 25 cm dalam satuan meter adalah…","0,25 m","2,5 m","25 m","250 m"],
+        ["Alat ukur massa di laboratorium adalah…","Neraca","Voltmeter","Barometer","Dinamometer"],
+        ["Satuan SI untuk suhu termodinamik adalah…","kelvin","celsius","fahrenheit","joule"],
+        ["Banyak angka penting pada 0,0405 adalah…","3","2","4","5"],
+        ["Pengukuran berulang berguna untuk…","Mengurangi pengaruh kesalahan acak","Mengubah satuan pokok","Menghilangkan kebutuhan alat ukur","Menambah nilai besaran"],
+        ["Gerak lurus beraturan memiliki…","Kecepatan tetap","Percepatan tetap tidak nol","Lintasan melingkar","Kecepatan selalu bertambah"],
+        ["Benda bergerak 120 m selama 20 s. Kelajuannya…","6 m/s","12 m/s","100 m/s","2 m/s"],
+        ["Pada grafik posisi-waktu GLB, kemiringan grafik menyatakan…","Kecepatan","Percepatan","Massa","Gaya"],
+        ["Benda menempuh jarak sama dalam selang waktu sama berarti…","Kelajuan tetap","Percepatan bertambah","Benda diam","Arah selalu berubah"],
+        ["Jika posisi awal 5 m dan bergerak 3 m/s selama 4 s, posisi akhirnya…","17 m","12 m","20 m","8 m"],
+        ["Kecepatan rata-rata dihitung dengan…","Perpindahan dibagi waktu","Jarak dikali waktu","Massa dibagi volume","Gaya dikali jarak"],
+        ["Pada GLB, percepatan benda adalah…","Nol","Tetap 1 m/s²","Selalu bertambah","Sama dengan kecepatannya"],
+        ["Mobil bergerak 15 m/s selama 8 s. Jarak tempuhnya…","120 m","23 m","7 m","1,875 m"],
+        ["Jika grafik posisi-waktu mendatar, benda…","Diam","Bergerak makin cepat","Bergerak melingkar","Memiliki percepatan maksimum"],
+        ["Perpindahan berbeda dari jarak karena perpindahan…","Memperhitungkan arah","Selalu lebih besar","Tidak memiliki satuan","Selalu bernilai positif"],
+        ["Percepatan adalah perubahan…","Kecepatan tiap satuan waktu","Posisi tiap satuan massa","Gaya tiap satuan jarak","Jarak tiap satuan suhu"],
+        ["Kecepatan berubah dari 4 m/s menjadi 16 m/s dalam 3 s. Percepatannya…","4 m/s²","6 m/s²","12 m/s²","20 m/s²"],
+        ["Benda mula-mula diam dipercepat 2 m/s² selama 5 s. Kecepatan akhirnya…","10 m/s","2,5 m/s","7 m/s","25 m/s"],
+        ["Persamaan kecepatan pada percepatan tetap adalah…","v = v₀ + at","s = m/V","F = m/a","P = Wt"],
+        ["Mobil melambat dari 20 m/s menjadi 5 m/s dalam 3 s. Percepatannya…","−5 m/s²","5 m/s²","−15 m/s²","15 m/s²"],
+        ["Benda jatuh bebas dekat permukaan Bumi mengalami percepatan…","Gravitasi ke bawah","Nol","Ke atas","Mendatar"],
+        ["Jika kecepatan awal 0 dan percepatan 3 m/s² selama 4 s, jarak tempuhnya…","24 m","12 m","48 m","7 m"],
+        ["Satuan percepatan dalam SI adalah…","m/s²","m/s","kg·m/s","N/m"],
+        ["Benda bergerak melingkar dengan kelajuan tetap tetap mengalami percepatan karena…","Arah kecepatannya berubah","Massanya berubah","Lintasannya lurus","Tidak ada gaya"],
+        ["Pada grafik kecepatan-waktu, luas daerah di bawah grafik menyatakan…","Perpindahan","Percepatan","Massa","Gaya"]
+      ]),
+      "Sejarah Indonesia":buildFocusQuestions([
+        ["Organisasi Budi Utomo berdiri pada tahun…","1908","1928","1942","1945"],
+        ["Budi Utomo dikenal sebagai organisasi yang bergerak terutama di bidang…","Pendidikan dan kebudayaan","Perdagangan rempah","Militer Jepang","Perlawanan laut"],
+        ["Sarekat Islam pada awalnya berkembang dari organisasi…","Sarekat Dagang Islam","Indische Partij","Perhimpunan Indonesia","PUTERA"],
+        ["Tokoh pendiri Indische Partij bersama Douwes Dekker dan Cipto adalah…","Ki Hajar Dewantara","Soepomo","Mohammad Hatta","Ahmad Dahlan"],
+        ["Tiga Serangkai terdiri atas Douwes Dekker, Cipto Mangunkusumo, dan…","Ki Hajar Dewantara","Soekarno","Sutan Sjahrir","Wahidin Sudirohusodo"],
+        ["Perhimpunan Indonesia berkembang di…","Belanda","Jepang","Australia","Mesir"],
+        ["Sumpah Pemuda diikrarkan pada…","28 Oktober 1928","20 Mei 1908","1 Juni 1945","17 Agustus 1945"],
+        ["Salah satu isi Sumpah Pemuda adalah menjunjung bahasa persatuan…","Bahasa Indonesia","Bahasa Belanda","Bahasa Jawa","Bahasa Melayu saja"],
+        ["Kongres Pemuda II menghasilkan…","Sumpah Pemuda","Proklamasi Kemerdekaan","Piagam Jakarta","Konferensi Meja Bundar"],
+        ["Lagu Indonesia Raya pertama kali diperdengarkan pada Kongres Pemuda II oleh…","Wage Rudolf Supratman","Ismail Marzuki","Cornel Simanjuntak","Kusbini"],
+        ["BPUPKI dibentuk pada masa pendudukan…","Jepang","Inggris","Belanda","Portugis"],
+        ["Ketua BPUPKI adalah…","Dr. Radjiman Wedyodiningrat","Soekarno","Mohammad Hatta","Achmad Soebardjo"],
+        ["Sidang pertama BPUPKI membahas…","Dasar negara Indonesia merdeka","Pembentukan ASEAN","Pemilihan presiden pertama","Perjanjian Linggarjati"],
+        ["Panitia Sembilan menghasilkan naskah yang dikenal sebagai…","Piagam Jakarta","Dekret Presiden","Supersemar","Teks Linggarjati"],
+        ["PPKI dibentuk untuk…","Mempersiapkan kemerdekaan Indonesia","Membentuk VOC","Mengatur tanam paksa","Menyusun strategi Jepang"],
+        ["Peristiwa Rengasdengklok bertujuan mendesak Soekarno-Hatta agar…","Segera memproklamasikan kemerdekaan","Menemui tentara Sekutu","Membubarkan BPUPKI","Kembali ke Jepang"],
+        ["Naskah proklamasi dirumuskan di rumah…","Laksamana Maeda","Jenderal Terauchi","Van Mook","Sutan Sjahrir"],
+        ["Tokoh yang mengetik naskah proklamasi adalah…","Sayuti Melik","W.R. Supratman","Soepomo","Sukarni"],
+        ["Naskah proklamasi ditandatangani atas nama…","Bangsa Indonesia","Pemerintah Jepang","BPUPKI","Sekutu"],
+        ["Proklamasi Kemerdekaan Indonesia dibacakan pada…","17 Agustus 1945","18 Agustus 1945","1 Juni 1945","10 November 1945"],
+        ["Proklamasi dibacakan di…","Jalan Pegangsaan Timur 56, Jakarta","Rengasdengklok","Gedung Volksraad","Lapangan Ikada"],
+        ["Tokoh yang membacakan teks proklamasi adalah…","Soekarno","Mohammad Hatta","Ahmad Soebardjo","Sutan Sjahrir"],
+        ["Bendera Merah Putih yang dikibarkan saat proklamasi dijahit oleh…","Fatmawati","Cut Nyak Dien","Rasuna Said","Dewi Sartika"],
+        ["Pada 18 Agustus 1945, PPKI menetapkan…","UUD 1945","Konstitusi RIS","Piagam ASEAN","Perjanjian Renville"],
+        ["Presiden dan wakil presiden pertama Indonesia adalah…","Soekarno dan Mohammad Hatta","Soepomo dan Sjahrir","Sukarno dan Sutan Sjahrir","Hatta dan Ahmad Soebardjo"],
+        ["Peristiwa 10 November diperingati sebagai Hari…","Pahlawan","Kebangkitan Nasional","Kesaktian Pancasila","Pendidikan Nasional"],
+        ["Pertempuran Surabaya pada 1945 menunjukkan…","Perlawanan rakyat mempertahankan kemerdekaan","Awal pendudukan Portugis","Pembentukan BPUPKI","Berakhirnya Perang Diponegoro"],
+        ["Tujuan utama BPUPKI adalah…","Menyelidiki persiapan kemerdekaan Indonesia","Mengatur perdagangan Belanda","Memimpin tentara Sekutu","Membentuk pemerintahan kolonial"],
+        ["Pancasila sebagai dasar negara disahkan oleh PPKI pada…","18 Agustus 1945","17 Agustus 1945","28 Oktober 1928","1 Maret 1945"],
+        ["Makna penting proklamasi bagi bangsa Indonesia adalah…","Pernyataan kemerdekaan dan awal pemerintahan berdaulat","Penyerahan kembali kepada Belanda","Pembentukan organisasi pemuda","Berakhirnya seluruh perjuangan bangsa"]
+      ]),
+      "Bahasa Indonesia":buildFocusQuestions([
+        ["Teks eksplanasi bertujuan untuk…","Menjelaskan proses terjadinya fenomena","Menceritakan pengalaman pribadi","Mengajak membeli barang","Menggambarkan tokoh fiksi"],
+        ["Bagian awal teks eksplanasi biasanya berisi…","Pernyataan umum tentang fenomena","Daftar tokoh cerita","Ajakan kepada pembaca","Kesimpulan penelitian saja"],
+        ["Konjungsi kausalitas yang tepat adalah…","sebab","kemudian","sementara","meskipun"],
+        ["Kata “sehingga” menyatakan hubungan…","Akibat","Pertentangan","Pilihan","Perbandingan"],
+        ["Kalimat yang bersifat faktual adalah…","Air menguap ketika menerima panas.","Menurutku hujan adalah hal paling indah.","Gunung itu tampak sangat memesona.","Semua orang pasti menyukai musim hujan."],
+        ["Urutan struktur teks eksplanasi yang tepat adalah…","Pernyataan umum–deretan penjelas–interpretasi","Orientasi–komplikasi–resolusi","Tesis–argumen–penegasan ulang","Abstrak–orientasi–koda"],
+        ["Kata teknis dalam teks tentang gempa bumi adalah…","Tektonik","Menawan","Berlarian","Sepertinya"],
+        ["Kalimat pasif yang tepat adalah…","Banjir disebabkan oleh hujan deras.","Hujan deras menyebabkan banjir.","Warga membersihkan selokan.","Awan bergerak di langit."],
+        ["Dalam teks eksplanasi, “oleh karena itu” umumnya menandai…","Kesimpulan atau akibat","Pengenalan tokoh","Dialog langsung","Latar tempat"],
+        ["Informasi teks eksplanasi sebaiknya disusun…","Logis dan berurutan","Acak agar menarik","Dalam bentuk dialog saja","Tanpa hubungan sebab akibat"],
+        ["Kalimat efektif adalah kalimat yang…","Jelas, hemat, dan sesuai kaidah","Selalu memiliki banyak kata","Mengulang subjek berkali-kali","Menggunakan istilah asing sebanyaknya"],
+        ["Perbaikan kalimat “Para siswa-siswa sedang belajar” adalah…","Para siswa sedang belajar.","Para siswa-siswa belajar sedang.","Siswa para sedang belajar-belajar.","Para siswa semuanya pada sedang belajar."],
+        ["Kalimat dengan subjek-predikat yang jelas adalah…","Rina membaca buku di perpustakaan.","Di perpustakaan buku yang sangat menarik.","Karena hujan deras sekali.","Buku itu yang dibeli kemarin."],
+        ["Kata baku yang tepat adalah…","aktivitas","aktifitas","ijin","resiko"],
+        ["Penulisan kata depan yang benar adalah…","di sekolah","disekolah","diambil di rumah ditulis disana","keatas meja"],
+        ["Kalimat “Ia masuk ke dalam ruangan” dapat dihemat menjadi…","Ia masuk ke ruangan.","Ia masuk ke dalam ke ruangan.","Ia memasuki ke dalam ruangan.","Ia masuk dalam ke ruangan."],
+        ["Penggunaan tanda koma yang tepat terdapat pada…","Ibu membeli beras, sayur, dan buah.","Ibu, membeli beras sayur dan buah.","Ibu membeli, beras sayur, dan buah.","Ibu membeli beras sayur dan, buah."],
+        ["Kata baku untuk “analisa” adalah…","analisis","analisa","analitiksa","menganalisa"],
+        ["Kalimat yang tidak ambigu adalah…","Adik melihat burung dengan teropong.","Saya melihat teman baru dengan kaca mata.","Guru baru datang dari sekolah lama.","Mereka membahas buku sejarah baru."],
+        ["Kalimat efektif menghindari…","Pemborosan kata","Subjek yang jelas","Pilihan kata baku","Hubungan gagasan"],
+        ["Tesis dalam teks argumentasi berisi…","Pendapat atau posisi penulis","Daftar pustaka","Rangkaian dialog","Urutan langkah kerja"],
+        ["Argumen yang kuat sebaiknya didukung oleh…","Fakta dan alasan yang relevan","Pengulangan pendapat","Serangan kepada pembaca","Informasi yang tidak berkaitan"],
+        ["Kalimat opini ditandai oleh…","Penilaian atau pandangan subjektif","Data terukur yang terverifikasi","Waktu dan tempat yang pasti","Hasil pengamatan langsung saja"],
+        ["Contoh kalimat fakta adalah…","Indonesia memproklamasikan kemerdekaan pada 17 Agustus 1945.","Pantai itu paling indah di dunia.","Belajar daring lebih menyenangkan.","Sepertinya semua siswa setuju."],
+        ["Konjungsi yang menyatakan pertentangan adalah…","Namun","Karena","Sehingga","Kemudian"],
+        ["Penegasan ulang dalam argumentasi berfungsi untuk…","Menegaskan kembali posisi penulis","Memperkenalkan tokoh cerita","Mengubah topik tanpa alasan","Menyajikan daftar pertanyaan"],
+        ["Argumen “Sekolah perlu menyediakan tempat sampah terpilah karena dapat memudahkan daur ulang” menggunakan…","Alasan yang mendukung pendapat","Kalimat perintah tanpa alasan","Cerita khayalan","Pertanyaan retoris saja"],
+        ["Kata “menurut data” biasanya mengawali…","Rujukan fakta atau bukti","Ungkapan sapaan","Kalimat larangan","Perintah langsung"],
+        ["Sanggahan yang santun dapat diawali dengan…","Saya memahami pendapat tersebut, tetapi…","Pendapatmu pasti salah.","Itu tidak masuk akal.","Kamu tidak mengerti."],
+        ["Paragraf argumentasi yang padu memiliki…","Gagasan utama dan alasan yang saling berkaitan","Banyak topik tanpa transisi","Kalimat yang berulang-ulang","Hanya pertanyaan tanpa jawaban"]
+      ]),
+      "Kimia":buildFocusQuestions([
+        ["Nomor atom menunjukkan jumlah…","Proton dalam inti atom","Neutron dalam inti atom","Kulit elektron","Nukleon selalu"],
+        ["Atom netral memiliki jumlah…","Proton sama dengan elektron","Proton sama dengan neutron selalu","Elektron tanpa proton","Neutron sama dengan elektron selalu"],
+        ["Partikel bermuatan negatif dalam atom adalah…","Elektron","Proton","Neutron","Nukleus"],
+        ["Nomor massa merupakan jumlah…","Proton dan neutron","Proton dan elektron","Neutron dan elektron","Kulit dan elektron"],
+        ["Isotop adalah atom-atom dengan…","Nomor atom sama, nomor massa berbeda","Nomor massa sama, proton berbeda","Elektron sama, unsur berbeda","Jumlah neutron sama selalu"],
+        ["Partikel yang menentukan identitas suatu unsur adalah…","Proton","Neutron","Elektron valensi","Nomor massa"],
+        ["Muatan ion Na⁺ terbentuk ketika natrium…","Melepaskan satu elektron","Menerima satu elektron","Melepaskan satu proton","Menerima satu neutron"],
+        ["Isoton memiliki jumlah…","Neutron sama","Proton sama","Elektron valensi sama","Nomor massa sama"],
+        ["Sebagian besar massa atom terpusat di…","Inti atom","Kulit terluar","Ruang antar atom","Awan elektron terluar saja"],
+        ["Model atom Rutherford menyatakan bahwa atom memiliki…","Inti kecil bermuatan positif","Elektron tertanam dalam bola positif","Lintasan elektron dengan tingkat energi tertentu saja","Inti yang tidak memiliki proton"],
+        ["Konfigurasi elektron atom oksigen (nomor atom 8) adalah…","2, 6","2, 8","2, 4","8, 0"],
+        ["Konfigurasi elektron natrium (nomor atom 11) adalah…","2, 8, 1","2, 7, 2","2, 8, 2","2, 9"],
+        ["Elektron pada kulit terluar disebut…","Elektron valensi","Neutron valensi","Proton bebas","Elektron inti"],
+        ["Unsur dengan konfigurasi 2, 8, 7 cenderung…","Menerima satu elektron","Melepaskan tujuh elektron","Menerima delapan proton","Tidak membentuk ion"],
+        ["Magnesium (2, 8, 2) cenderung membentuk ion…","Mg²⁺","Mg⁻","Mg²⁻","Mg⁺"],
+        ["Kulit elektron pertama maksimum menampung…","2 elektron","8 elektron","18 elektron","32 elektron"],
+        ["Unsur dengan 1 elektron valensi umumnya berada pada golongan…","1","2","17","18"],
+        ["Konfigurasi elektron klorin dengan nomor atom 17 adalah…","2, 8, 7","2, 8, 8","2, 7, 8","2, 9, 6"],
+        ["Atom klorin cenderung mencapai kestabilan dengan…","Menerima satu elektron","Melepaskan tujuh elektron","Melepaskan satu proton","Menerima tujuh neutron"],
+        ["Ion O²⁻ terbentuk ketika atom oksigen…","Menerima dua elektron","Melepaskan dua elektron","Menerima dua proton","Melepaskan dua neutron"],
+        ["Dalam tabel periodik, satu periode menunjukkan…","Jumlah kulit elektron terisi","Jumlah elektron valensi selalu","Jumlah neutron","Jenis ikatan kimia"],
+        ["Unsur-unsur dalam satu golongan utama umumnya memiliki…","Jumlah elektron valensi serupa","Jumlah kulit sama","Nomor massa sama","Jumlah neutron sama"],
+        ["Gas mulia berada pada golongan…","18","1","2","17"],
+        ["Unsur halogen terdapat pada golongan…","17","1","2","18"],
+        ["Dalam satu periode dari kiri ke kanan, sifat logam umumnya…","Berkurang","Bertambah","Tidak berubah sama sekali","Berubah menjadi gas mulia langsung"],
+        ["Jari-jari atom dalam satu golongan dari atas ke bawah cenderung…","Bertambah","Berkurang","Tetap","Menjadi nol"],
+        ["Natrium termasuk jenis unsur…","Logam alkali","Halogen","Gas mulia","Metaloid"],
+        ["Kalsium berada pada golongan…","2","1","16","18"],
+        ["Lambang unsur kalium adalah…","K","Ka","P","Kl"],
+        ["Tabel periodik modern disusun berdasarkan kenaikan…","Nomor atom","Nomor massa relatif saja","Jumlah neutron","Titik didih"]
+      ]),
+      "Ekonomi":buildFocusQuestions([
+        ["Kelangkaan terjadi karena…","Kebutuhan tidak terbatas, sumber daya terbatas","Semua barang tersedia tanpa batas","Kebutuhan manusia selalu sama","Tidak ada pilihan dalam konsumsi"],
+        ["Biaya peluang adalah…","Nilai alternatif terbaik yang dikorbankan","Jumlah uang yang sudah dibelanjakan","Harga seluruh barang di pasar","Biaya produksi tetap saja"],
+        ["Contoh kebutuhan primer adalah…","Makanan","Perhiasan mewah","Mobil sport","Liburan ke luar negeri"],
+        ["Prinsip ekonomi mendorong seseorang untuk…","Mendapat hasil maksimal dengan pengorbanan tertentu","Menggunakan sumber daya tanpa pertimbangan","Membeli semua barang sekaligus","Menghindari segala bentuk pilihan"],
+        ["Motif ekonomi seseorang bekerja untuk memperoleh penghasilan adalah…","Memenuhi kebutuhan hidup","Mengurangi jumlah barang","Menaikkan biaya peluang orang lain","Menghilangkan kelangkaan sepenuhnya"],
+        ["Barang substitusi untuk teh dapat berupa…","Kopi","Gula","Gelas","Sendok"],
+        ["Barang komplementer bagi mobil adalah…","Bahan bakar","Teh","Buku tulis","Pakaian"],
+        ["Kegiatan menghasilkan atau menambah nilai guna barang disebut…","Produksi","Konsumsi","Distribusi","Investasi"],
+        ["Kegiatan menyalurkan barang dari produsen ke konsumen disebut…","Distribusi","Produksi","Konsumsi","Tabungan"],
+        ["Rumah tangga konsumen berperan sebagai…","Pemakai barang dan jasa serta penyedia faktor produksi","Pembuat kebijakan moneter saja","Penjual seluruh hasil impor","Penentu pajak perusahaan"],
+        ["Hukum permintaan menyatakan, saat harga naik, jumlah diminta cenderung…","Turun, ceteris paribus","Naik selalu","Tetap tanpa perubahan","Menjadi tidak terbatas"],
+        ["Hukum penawaran menyatakan, saat harga naik, jumlah ditawarkan cenderung…","Naik, ceteris paribus","Turun selalu","Tetap tanpa perubahan","Menjadi nol"],
+        ["Faktor yang dapat menggeser permintaan adalah…","Pendapatan konsumen","Harga barang itu sendiri saja","Biaya produksi perusahaan","Jumlah produsen"],
+        ["Jika harga kopi naik dan teh adalah barang substitusinya, permintaan teh cenderung…","Meningkat","Menurun","Tetap pasti","Menjadi nol"],
+        ["Kurva permintaan umumnya memiliki kemiringan…","Menurun dari kiri atas ke kanan bawah","Menaik dari kiri bawah ke kanan atas","Tegak lurus sumbu harga","Mendatar selalu"],
+        ["Biaya produksi naik biasanya menggeser kurva penawaran ke…","Kiri","Kanan","Atas dan kanan selalu","Tidak bergeser"],
+        ["Jika pendapatan naik, permintaan barang normal umumnya…","Meningkat","Menurun","Tetap nol","Tidak dipengaruhi"],
+        ["Ceteris paribus berarti…","Faktor lain dianggap tetap","Semua faktor berubah bersamaan","Harga tidak berlaku","Pasar tidak memiliki konsumen"],
+        ["Permintaan pasar merupakan…","Jumlah permintaan seluruh konsumen pada berbagai harga","Jumlah barang yang diproduksi satu perusahaan","Total pajak penjual","Persediaan barang pemerintah"],
+        ["Subsidi pemerintah kepada produsen cenderung…","Meningkatkan penawaran","Mengurangi penawaran selalu","Menghapus permintaan","Menaikkan biaya produksi"],
+        ["Harga keseimbangan terbentuk ketika…","Jumlah diminta sama dengan jumlah ditawarkan","Permintaan selalu lebih besar","Penawaran sama dengan nol","Pemerintah menetapkan harga tertinggi"],
+        ["Jika harga pasar berada di atas harga keseimbangan, cenderung terjadi…","Surplus","Kekurangan barang","Keseimbangan baru otomatis","Tidak ada penawaran"],
+        ["Jika harga di bawah harga keseimbangan, cenderung terjadi…","Kekurangan barang","Surplus besar","Penawaran tanpa batas","Permintaan menjadi nol"],
+        ["Titik perpotongan kurva permintaan dan penawaran menunjukkan…","Harga dan jumlah keseimbangan","Biaya tetap perusahaan","Pendapatan konsumen","Jumlah pajak"],
+        ["Ketika permintaan meningkat dan penawaran tetap, harga keseimbangan cenderung…","Naik","Turun","Tetap pasti","Menjadi nol"],
+        ["Ketika penawaran meningkat dan permintaan tetap, harga keseimbangan cenderung…","Turun","Naik","Tetap pasti","Tidak dapat ditentukan dalam kondisi apa pun"],
+        ["Pada harga Rp10.000, jumlah diminta 50 dan ditawarkan 50. Pasar berada pada…","Keseimbangan","Surplus 50 unit","Kekurangan 50 unit","Monopoli"],
+        ["Pajak per unit kepada produsen cenderung membuat kurva penawaran…","Bergeser ke kiri","Bergeser ke kanan","Menjadi kurva permintaan","Tidak berubah dalam semua keadaan"],
+        ["Kelebihan permintaan terjadi saat…","Jumlah diminta lebih besar daripada jumlah ditawarkan","Jumlah ditawarkan lebih besar daripada jumlah diminta","Kedua jumlah sama","Harga sama dengan biaya tetap"],
+        ["Mekanisme harga membantu pasar untuk…","Mengalokasikan sumber daya melalui sinyal permintaan dan penawaran","Menghilangkan kebutuhan manusia","Menjamin semua barang gratis","Menghapus persaingan sepenuhnya"]
+      ]),
+      "Informatika":buildFocusQuestions([
+        ["Berpikir komputasional adalah pendekatan untuk…","Memecahkan masalah secara terstruktur","Menghafal semua bahasa pemrograman","Menggunakan komputer tanpa tujuan","Menggambar antarmuka saja"],
+        ["Memecah masalah besar menjadi bagian kecil disebut…","Dekomposisi","Abstraksi","Enkripsi","Simulasi"],
+        ["Mencari kesamaan dari beberapa masalah merupakan…","Pengenalan pola","Dekomposisi","Debugging","Kompilasi"],
+        ["Memusatkan perhatian pada informasi penting dan mengabaikan detail yang tidak perlu disebut…","Abstraksi","Iterasi","Enkripsi","Deklarasi"],
+        ["Urutan langkah logis untuk menyelesaikan masalah disebut…","Algoritma","Variabel","Perangkat keras","Jaringan"],
+        ["Kumpulan instruksi yang tersusun berurutan dan jelas adalah…","Algoritma","Pola warna","Basis data","Sistem operasi"],
+        ["Dalam algoritma, percabangan digunakan untuk…","Memilih tindakan berdasarkan kondisi","Mengulang langkah tanpa henti selalu","Menyimpan berkas","Menghubungkan komputer ke internet"],
+        ["Perulangan dalam algoritma berguna untuk…","Menjalankan langkah berulang kali","Menghapus semua kondisi","Mengganti nama variabel","Mencetak diagram"],
+        ["Simbol belah ketupat pada flowchart biasanya berarti…","Keputusan atau kondisi","Mulai/selesai","Proses","Masukan/keluaran"],
+        ["Simbol oval pada flowchart umumnya menunjukkan…","Mulai atau selesai","Keputusan","Proses perhitungan","Dokumen"],
+        ["Variabel dalam program digunakan untuk…","Menyimpan nilai yang dapat digunakan program","Menjalankan perangkat keras","Menggambar flowchart otomatis","Menghapus sintaks"],
+        ["Tipe data bilangan bulat biasanya disebut…","Integer","String","Boolean","Character"],
+        ["Nilai true atau false termasuk tipe data…","Boolean","Integer","String","Float"],
+        ["Perintah input berfungsi untuk…","Menerima data dari pengguna","Menampilkan keluaran saja","Mengulang program","Menghentikan sistem operasi"],
+        ["Output program adalah…","Informasi yang dihasilkan atau ditampilkan program","Data yang selalu dimasukkan pengguna","Kesalahan sintaks","Nama variabel"],
+        ["Operator perbandingan == biasanya digunakan untuk…","Menguji apakah dua nilai sama","Menetapkan nama variabel","Menjumlahkan nilai","Membagi bilangan"],
+        ["Apa hasil ekspresi 7 % 3 pada bahasa yang mendukung modulo?","1","2","3","0"],
+        ["Kesalahan penulisan aturan bahasa pemrograman disebut…","Kesalahan sintaks","Kesalahan perangkat keras","Kesalahan jaringan","Kesalahan kompresi"],
+        ["Proses menemukan dan memperbaiki kesalahan program disebut…","Debugging","Browsing","Rendering","Streaming"],
+        ["Komentar pada kode digunakan untuk…","Memberi penjelasan yang tidak dijalankan sebagai instruksi","Menyimpan nilai angka","Mengulang perintah","Menghapus variabel"],
+        ["Dalam flowchart, panah berfungsi untuk…","Menunjukkan arah alur proses","Menandai nilai variabel","Menunjukkan ukuran data","Mengakhiri semua cabang"],
+        ["Pseudocode adalah…","Deskripsi algoritma dengan bahasa sederhana terstruktur","Kode mesin khusus prosesor","Bahasa markup untuk halaman web","Nama lain perangkat keras"],
+        ["Sebuah algoritma yang baik seharusnya…","Memiliki langkah jelas dan berhingga","Memiliki langkah acak tanpa akhir","Tidak membutuhkan masukan maupun keluaran","Mengulang tanpa kondisi berhenti"],
+        ["Jika kondisi IF bernilai salah, program akan…","Menjalankan cabang alternatif jika tersedia","Selalu menjalankan cabang IF","Menghapus semua variabel","Mati tanpa aturan"],
+        ["Indeks pertama pada banyak bahasa pemrograman dimulai dari…","0","1","−1","10"],
+        ["Struktur data list atau array digunakan untuk…","Menyimpan beberapa nilai dalam satu kumpulan berurutan","Menyimpan hanya satu karakter","Menggambar diagram alir","Mengatur koneksi listrik"],
+        ["Nama variabel yang baik seharusnya…","Menggambarkan isi nilai yang disimpan","Selalu terdiri dari angka saja","Memakai spasi dan tanda baca bebas","Sama dengan semua kata kunci"],
+        ["Jika x = 4 lalu x = x + 3, nilai akhir x adalah…","7","4","3","12"],
+        ["Urutan yang benar untuk menghitung rata-rata adalah…","Jumlahkan data lalu bagi dengan banyak data","Kalikan data lalu kurangi banyak data","Urutkan data lalu ambil nilai terbesar","Bagi banyak data dengan jumlah data tanpa menjumlah"],
+        ["Contoh penerapan pengenalan pola adalah…","Mengamati pola kemacetan berulang pada jam tertentu","Menghapus semua data yang berbeda","Menyalakan komputer tanpa tujuan","Mengetik kode secara acak"]
+      ])
+    };
+    const announcements = [
+      {id:"porseni-2026",day:"03",month:"Nov",category:"Kesiswaan",title:"Pendaftaran kegiatan Porseni 2026 dibuka!",body:"Daftarkan diri dan tunjukkan bakatmu. Pendaftaran dibuka hingga 10 November 2026 melalui sekretariat OSIS.",date:"3 Nov 2026 · 08:00",icon:"🏆",article:["Pekan Olahraga dan Seni (Porseni) menjadi kesempatan bagi siswa untuk berpartisipasi dalam kegiatan di luar pembelajaran kelas serta menunjukkan minat dan bakat. Siswa yang tertarik dapat mulai mencari informasi mengenai cabang kegiatan yang tersedia dan menyiapkan diri untuk mengikuti proses pendaftaran.","Pendaftaran dibuka sampai 10 November 2026 melalui sekretariat OSIS. Sampaikan nama, kelas, dan cabang yang diminati kepada petugas sekretariat. Jika informasi persyaratan atau jadwal belum tersedia, tanyakan langsung kepada panitia sebelum mendaftar agar tidak ada informasi yang terlewat.","Setelah mendaftar, ikuti arahan panitia mengenai jadwal seleksi, latihan, dan perlengkapan yang perlu dibawa. Pastikan tetap mengikuti pelajaran seperti biasa dan atur waktu kegiatan dengan baik. Informasi rinci mengenai cabang lomba dan jadwal kegiatan dapat dikonfirmasi melalui sekretariat OSIS."],details:["Pendaftaran dibuka hingga 10 November 2026.","Siswa yang berminat dapat mendaftarkan diri melalui sekretariat OSIS.","Porseni menjadi kesempatan untuk berpartisipasi dan menunjukkan bakat. Tanyakan cabang lomba, jadwal, serta persyaratan kepada sekretariat OSIS."]},
+      {id:"uts-update",day:"02",month:"Nov",category:"Akademik",title:"Jadwal ujian tengah semester telah diperbarui",body:"Silakan periksa jadwal UTS semester ganjil melalui halaman akademik. Pastikan hadir 15 menit sebelum ujian.",date:"2 Nov 2026 · 14:30",icon:"📝",article:["Jadwal Ujian Tengah Semester (UTS) semester ganjil telah diperbarui. Setiap siswa diminta menggunakan jadwal terbaru yang tersedia di halaman akademik sekolah sebagai acuan, karena jadwal yang tersimpan sebelumnya mungkin tidak lagi sesuai.","Periksa kembali mata pelajaran, tanggal, sesi, dan ruang ujian untuk setiap hari. Catat perubahan yang berkaitan dengan kelasmu dan siapkan perlengkapan belajar lebih awal. Jika terdapat informasi yang tidak jelas atau tidak sesuai, konfirmasikan kepada wali kelas atau bagian akademik sebelum hari ujian.","Pada hari ujian, siswa diminta hadir 15 menit sebelum ujian dimulai agar memiliki waktu untuk bersiap dan memasuki ruang dengan tertib. Ikuti petunjuk pengawas serta ketentuan ujian yang berlaku. Periksa halaman akademik secara berkala untuk mengetahui jika ada pembaruan berikutnya."],details:["Jadwal terbaru tersedia melalui halaman akademik sekolah.","Periksa kembali mata pelajaran, tanggal, sesi, dan ruang ujian sebelum hari pelaksanaan.","Siswa diminta hadir 15 menit sebelum ujian dimulai.","Jika menemukan jadwal yang tidak sesuai, tanyakan kepada wali kelas atau bagian akademik."]},
+      {id:"jumat-bersih",day:"01",month:"Nov",category:"Kegiatan",title:"Program Jumat Bersih dimulai pekan ini",body:"Mari menjaga lingkungan sekolah tetap nyaman. Setiap kelas membawa perlengkapan kebersihan masing-masing.",date:"1 Nov 2026 · 09:00",icon:"🌿",article:["Program Jumat Bersih mengajak seluruh warga sekolah untuk menjaga ruang belajar dan lingkungan bersama agar tetap bersih, sehat, dan nyaman. Setiap kelas berpartisipasi dengan merapikan area yang digunakan serta bekerja sama dengan teman sekelas.","Setiap kelas diminta membawa perlengkapan kebersihan masing-masing. Sebelum kegiatan dimulai, dengarkan arahan guru atau wali kelas mengenai area yang menjadi tanggung jawab kelas. Gunakan alat kebersihan dengan hati-hati dan minta bantuan guru jika menemukan kondisi yang berisiko atau memerlukan penanganan khusus.","Setelah kegiatan, kembalikan perlengkapan ke tempatnya dan pastikan sampah dibuang pada tempat yang sesuai. Kebiasaan menjaga kebersihan tidak hanya dilakukan saat kegiatan berlangsung, tetapi juga diterapkan dalam keseharian di kelas dan lingkungan sekolah. Waktu pelaksanaan dan pembagian area dapat dikonfirmasi melalui wali kelas."],details:["Program dimulai pekan ini; pastikan waktu kegiatan melalui wali kelas atau pengumuman kelas.","Setiap kelas diminta membawa perlengkapan kebersihan masing-masing.","Jaga keselamatan saat menggunakan alat kebersihan dan ikuti arahan guru pendamping.","Buang sampah pada tempatnya dan rapikan kembali perlengkapan setelah kegiatan."]},
+      {id:"beasiswa-prestasi",day:"30",month:"Okt",category:"Akademik",title:"Pengumpulan berkas beasiswa prestasi",body:"Siswa yang memenuhi kriteria dapat mengumpulkan dokumen di ruang administrasi sebelum 12 November.",date:"30 Okt 2026 · 10:15",icon:"🎓",article:["Sekolah menyampaikan informasi pengumpulan berkas beasiswa prestasi bagi siswa yang memenuhi kriteria. Siswa dan orang tua dapat meninjau persyaratan yang berlaku sebelum menyiapkan dokumen, sehingga berkas yang diserahkan sesuai dengan kebutuhan proses seleksi.","Berkas dikumpulkan di ruang administrasi sekolah paling lambat 12 November. Sebelum menyerahkan dokumen, pastikan nama dan informasi yang diminta sudah terisi dengan benar. Untuk menghindari kekurangan berkas, konfirmasikan daftar dokumen, kriteria penerima, serta jam penerimaan langsung kepada bagian administrasi.","Jika membutuhkan penjelasan mengenai kelayakan atau proses pengumpulan, hubungi petugas administrasi sekolah. Simpan salinan dokumen penting untuk arsip pribadi dan tanyakan apakah ada tanda terima setelah berkas diserahkan. Keputusan dan informasi lanjutan mengenai beasiswa mengikuti pemberitahuan resmi sekolah."],details:["Batas pengumpulan berkas adalah 12 November 2026.","Berkas dikumpulkan di ruang administrasi sekolah.","Pengumuman ini ditujukan bagi siswa yang memenuhi kriteria beasiswa prestasi.","Konfirmasikan daftar dokumen, kriteria, dan jam penerimaan kepada bagian administrasi sebelum mengumpulkan."]},
+      {id:"sumpah-pemuda",day:"28",month:"Okt",category:"Kegiatan",title:"Peringatan Hari Sumpah Pemuda di sekolah",body:"Upacara dan pentas seni akan dilaksanakan di lapangan utama. Seluruh siswa mengenakan seragam batik.",date:"28 Okt 2026 · 07:30",icon:"🇮🇩",article:["Sekolah memperingati Hari Sumpah Pemuda melalui upacara dan pentas seni di lapangan utama. Kegiatan ini menjadi kesempatan bagi siswa untuk mengenang semangat persatuan dan menghargai keberagaman, sekaligus ikut meramaikan kegiatan sekolah bersama teman dan guru.","Seluruh siswa diminta mengenakan seragam batik. Datang sesuai arahan wali kelas atau panitia, menjaga ketertiban selama upacara, dan mengikuti petunjuk guru pendamping. Saat menyaksikan pentas seni, berikan dukungan dengan sikap yang baik dan tetap menjaga kebersihan area kegiatan.","Susunan acara dan waktu kehadiran dapat dikonfirmasi kepada wali kelas atau panitia sekolah. Jika ada perubahan teknis, ikuti informasi terbaru yang disampaikan melalui kanal resmi sekolah. Setelah kegiatan selesai, pastikan barang pribadi tidak tertinggal dan area lapangan tetap rapi."],details:["Kegiatan meliputi upacara dan pentas seni di lapangan utama sekolah.","Seluruh siswa diminta mengenakan seragam batik.","Ikuti arahan guru dan panitia selama kegiatan berlangsung.","Untuk susunan acara dan waktu kehadiran, ikuti informasi dari wali kelas atau panitia sekolah."]}
+    ];
+    function readLocal(key, fallback) {
+      try { const value=JSON.parse(localStorage.getItem(key)); return value===null?fallback:value; }
+      catch { return fallback; }
+    }
+    const state = {
+      page:"home", courseFilter:"Semua", infoFilter:"Semua", selectedAnnouncementId:null, search:"", scheduleDay:null,
+      companionStarted:false, companionReplyTimer:null,
+      openCourse:null, lessonIndex:0, learningTab:"materials",
+      studyProgress:readLocal("edunusa-study-progress",{}),
+      academicResults:(()=>{const results=readLocal("edunusa-academic-results",[]);return Array.isArray(results)?results:[];})(),
+      assignmentSubmissions:readLocal("edunusa-assignment-submissions",{}),
+      assignmentUploads:new Set(),
+      courseNotes:readLocal("edunusa-course-notes",{}),
+      studyTime:readLocal("edunusa-study-time",{}),
+      activeFocus:(()=>{try{return JSON.parse(sessionStorage.getItem("edunusa-focus-session")||"null");}catch{return null;}})(),
+      focusTimerInterval:null,focusWasFullscreen:false,focusConfirmAction:null
+    };
+    const oldMathCourseName="Matematika Wajib";
+    function migrateCourseRecord(record) {
+      const oldKey=oldMathCourseName;
+      const newKey="Matematika";
+      if(Object.prototype.hasOwnProperty.call(record,oldKey)) {
+        if(!Object.prototype.hasOwnProperty.call(record,newKey))record[newKey]=record[oldKey];
+        delete record[oldKey];
+        return true;
+      }
+      return false;
+    }
+    function migrateCourseRecordPrefix(record) {
+      let changed=false;
+      Object.keys(record).filter(key=>key.startsWith(oldMathCourseName+":")).forEach(oldKey=>{
+        const newKey="Matematika"+oldKey.slice(oldMathCourseName.length);
+        if(!Object.prototype.hasOwnProperty.call(record,newKey))record[newKey]=record[oldKey];
+        delete record[oldKey];
+        changed=true;
+      });
+      return changed;
+    }
+    let migratedMathCourseName=false;
+    migratedMathCourseName=migrateCourseRecord(state.studyProgress)||migratedMathCourseName;
+    if(state.academicResults.some(result=>result.courseName===oldMathCourseName)) {
+      state.academicResults=state.academicResults.map(result=>result.courseName===oldMathCourseName?{...result,courseName:"Matematika"}:result);
+      localStorage.setItem("edunusa-academic-results",JSON.stringify(state.academicResults));
+    }
+    migratedMathCourseName=migrateCourseRecord(state.courseNotes)||migratedMathCourseName;
+    migratedMathCourseName=migrateCourseRecordPrefix(state.assignmentSubmissions)||migratedMathCourseName;
+    migratedMathCourseName=migrateCourseRecordPrefix(state.studyTime)||migratedMathCourseName;
+    if(migratedMathCourseName) {
+      localStorage.setItem("edunusa-study-progress",JSON.stringify(state.studyProgress));
+      localStorage.setItem("edunusa-academic-results",JSON.stringify(state.academicResults));
+      localStorage.setItem("edunusa-course-notes",JSON.stringify(state.courseNotes));
+      localStorage.setItem("edunusa-assignment-submissions",JSON.stringify(state.assignmentSubmissions));
+      localStorage.setItem("edunusa-study-time",JSON.stringify(state.studyTime));
+    }
+    if(state.activeFocus?.courseName===oldMathCourseName) {
+      state.activeFocus.courseName="Matematika";
+      sessionStorage.setItem("edunusa-focus-session",JSON.stringify(state.activeFocus));
+    }
+    const $ = (selector, root=document) => root.querySelector(selector);
+    const $$ = (selector, root=document) => Array.from(root.querySelectorAll(selector));
+    let isDemoSession=false;
+    let isLocalAccount=false;
+    let currentAccountEmail="";
+    let currentAccountKey="";
+    function readLocalAccounts() {
+      const accounts=readLocal("zhennusa-local-accounts",{});
+      return accounts&&typeof accounts==="object"&&!Array.isArray(accounts)?accounts:{};
+    }
+    function bytesToHex(bytes) {
+      return Array.from(bytes,value=>value.toString(16).padStart(2,"0")).join("");
+    }
+    async function hashLocalPassword(password,saltHex) {
+      if(!crypto.subtle)throw new Error("Pembuatan akun lokal memerlukan browser modern dengan Web Crypto.");
+      const salt=new Uint8Array(saltHex.match(/.{2}/g).map(value=>parseInt(value,16)));
+      const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);
+      const bits=await crypto.subtle.deriveBits({name:"PBKDF2",salt,iterations:210000,hash:"SHA-256"},key,256);
+      return bytesToHex(new Uint8Array(bits));
+    }
+    function localAccountStorageKey(email) {
+      return email.trim().toLocaleLowerCase("en");
+    }
+    function currentPageCheckpointKey() {
+      return `zhennusa-page-checkpoint:${encodeURIComponent(currentAccountKey||currentAccountEmail.toLocaleLowerCase("en"))}`;
+    }
+    function restorePageCheckpoint() {
+      const savedPage=sessionStorage.getItem(currentPageCheckpointKey());
+      const page=savedPage&&$("#page-"+savedPage)?savedPage:"home";
+      if(page!=="home")navigate(page);
+    }
+    document.body.appendChild($("#focusWorkView"));
+    function setAuthMessage(message,error=false) {
+      const element=$("#authMessage");
+      element.textContent=message;
+      element.classList.toggle("show",Boolean(message));
+      element.classList.toggle("error",error);
+      element.setAttribute("role",error?"alert":"status");
+    }
+    function setAuthMode(mode) {
+      const creating=mode==="signup";
+      $("#authForm").dataset.mode=mode;
+      $("#authTitle").textContent=creating?"Buat akun Zhennusa":"Masuk ke Zhennusa";
+      $("#authDescription").textContent=creating?"Buat akun lokal untuk mencoba portal. Akun hanya berlaku di browser ini.":"Masuk dengan akun lokal di browser ini atau akun Firebase.";
+      $("#authConfirmWrap").hidden=!creating;
+      $("#authConfirmPassword").required=creating;
+      $("#authPassword").autocomplete=creating?"new-password":"current-password";
+      $("#authSubmit").textContent=creating?"Buat akun":"Masuk";
+      $("#demoLogin").hidden=creating;
+      $("#demoLoginNote").hidden=creating;
+      $("#authToggleText").textContent=creating?"Sudah memiliki akun?":"Belum punya akun?";
+      $("#authToggle").textContent=creating?"Masuk":"Buat akun";
+      setAuthMessage("");
+    }
+    function firebaseErrorText(code) {
+      const messages={
+        EMAIL_EXISTS:"Email ini sudah terdaftar. Silakan masuk.",
+        INVALID_EMAIL:"Format email tidak valid.",
+        WEAK_PASSWORD:"Kata sandi terlalu lemah. Gunakan minimal 6 karakter.",
+        INVALID_LOGIN_CREDENTIALS:"Email atau kata sandi salah.",
+        EMAIL_NOT_FOUND:"Email belum terdaftar.",
+        INVALID_PASSWORD:"Email atau kata sandi salah.",
+        USER_DISABLED:"Akun ini dinonaktifkan. Hubungi administrator.",
+        OPERATION_NOT_ALLOWED:"Provider Email/Password belum diaktifkan di Firebase Authentication.",
+        CONFIGURATION_NOT_FOUND:"Konfigurasi Firebase Authentication belum siap.",
+        API_KEY_INVALID:"Web API key Firebase tidak valid.",
+        REQUIRES_RECENT_LOGIN:"Demi keamanan, keluar lalu masuk kembali sebelum melakukan tindakan ini.",
+        EMAIL_NOT_FOUND:"Email akun tidak ditemukan.",
+        INVALID_ID_TOKEN:"Sesi login berakhir. Silakan masuk kembali.",
+        TOO_MANY_ATTEMPTS_TRY_LATER:"Terlalu banyak percobaan. Coba lagi nanti."
+      };
+      const errorCode=String(code||"").split(":")[0].trim();
+      return messages[errorCode]||`Autentikasi gagal (${errorCode||"kesalahan tidak diketahui"}). Periksa pengaturan Firebase dan coba lagi.`;
+    }
+    async function firebaseAuthRequest(endpoint,payload) {
+      if(!firebaseApiKey)throw new Error("Firebase belum dikonfigurasi. Admin perlu mengisi Web API key di variabel firebaseApiKey pada file index567.html.");
+      const response=await fetch(`https://identitytoolkit.googleapis.com/v1/${endpoint}?key=${encodeURIComponent(firebaseApiKey)}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(payload)
+      });
+      const result=await response.json();
+      if(!response.ok)throw new Error(firebaseErrorText(result.error?.message));
+      return result;
+    }
+    async function refreshFirebaseSession(session) {
+      if(!session.refreshToken)throw new Error("Sesi login berakhir. Silakan masuk kembali.");
+      const response=await fetch(`https://securetoken.googleapis.com/v1/token?key=${encodeURIComponent(firebaseApiKey)}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:new URLSearchParams({grant_type:"refresh_token",refresh_token:session.refreshToken})
+      });
+      const result=await response.json();
+      if(!response.ok)throw new Error(firebaseErrorText(result.error?.message));
+      const renewed={idToken:result.id_token,refreshToken:result.refresh_token,email:session.email,expiresAt:Date.now()+Number(result.expires_in)*1000};
+      localStorage.setItem("edunusa-auth-session",JSON.stringify(renewed));
+      return renewed;
+    }
+    async function sendFirebaseVerification(idToken) {
+      await firebaseAuthRequest("accounts:sendOobCode",{requestType:"VERIFY_EMAIL",idToken});
+    }
+    function currentProfileStorageKey() {
+      return `zhennusa-profile:${encodeURIComponent(currentAccountKey||currentAccountEmail.toLocaleLowerCase("en"))}`;
+    }
+    function setProfileMessage(message,error=false) {
+      const element=$("#profileMessage");
+      element.textContent=message;
+      element.classList.toggle("error",error);
+      element.setAttribute("role",error?"alert":"status");
+    }
+    function renderCurrentProfile() {
+      const profile=readLocal(currentProfileStorageKey(),{});
+      const displayName=profile.displayName||(isDemoSession?"Akun Demo":currentAccountEmail.split("@")[0])||"Akun";
+      $(".user-chip strong").textContent=displayName;
+      $(".user-chip small").textContent=isDemoSession?"Mode demo · data contoh":isLocalAccount?"Akun lokal · browser ini":currentAccountEmail;
+      $("#profileDisplayName").textContent=displayName;
+      $("#profileEmail").textContent=isDemoSession?"Mode lokal · tanpa akun Firebase":isLocalAccount?"Akun lokal · tanpa Firebase":currentAccountEmail;
+      $("#profileNameInput").value=displayName;
+      $$(".profile-avatar-image").forEach(image=>{
+        if(profile.photoDataUrl) {
+          image.src=profile.photoDataUrl;
+          image.hidden=false;
+        } else {
+          image.removeAttribute("src");
+          image.hidden=true;
+        }
+      });
+      $$(".profile-avatar-placeholder").forEach(placeholder=>{placeholder.hidden=Boolean(profile.photoDataUrl);});
+      $("#removeProfilePhoto").disabled=!profile.photoDataUrl;
+      $("#changeEmailForm").hidden=false;
+      $("#resetPasswordForm").hidden=false;
+      const localOnly=isDemoSession||isLocalAccount;
+      $("#newAccountEmail").disabled=localOnly;
+      $("#changeEmailForm button[type=submit]").disabled=localOnly;
+      $("#resetPasswordForm button[type=submit]").disabled=localOnly;
+      $("#changeEmailDescription").textContent=localOnly
+        ?"Akun lokal/demo tidak terhubung ke Firebase, sehingga email tidak dapat diubah dari sini."
+        :"Firebase akan mengirim tautan konfirmasi ke alamat email baru.";
+      $("#resetPasswordDescription").textContent=localOnly
+        ?"Akun lokal/demo tidak memakai reset kata sandi Firebase."
+        :"Firebase akan mengirim tautan reset kata sandi ke email.";
+      $("#deleteAccountButton").textContent=isLocalAccount?"⌫ Hapus akun lokal":isDemoSession?"⌫ Keluar dan hapus profil demo":"⌫ Hapus akun";
+    }
+    function enterAuthenticatedApp(email,accountId=email) {
+      currentAccountEmail=email||"";
+      currentAccountKey=String(accountId||email||"").toLocaleLowerCase("en");
+      document.body.classList.add("authenticated");
+      renderCurrentProfile();
+      renderCourses();
+      restorePageCheckpoint();
+      if(state.activeFocus)restoreFocusSession();
+    }
+    async function getCurrentFirebaseSession() {
+      if(isLocalAccount||isDemoSession)throw new Error("Akun lokal/demo tidak terhubung ke Firebase.");
+      let session=readLocal("edunusa-auth-session",null);
+      if(!session?.idToken)throw new Error("Sesi login tidak ditemukan. Silakan masuk kembali.");
+      if(Number(session.expiresAt)<=Date.now()+30000)session=await refreshFirebaseSession(session);
+      return session;
+    }
+    function openProfileDrawer(showPhotoMenu=false) {
+      if(!document.body.classList.contains("authenticated"))return;
+      renderCurrentProfile();
+      setProfileMessage("");
+      $("#profileBackdrop").classList.add("open");
+      $("#profileBackdrop").setAttribute("aria-hidden","false");
+      document.body.classList.add("profile-open");
+      setProfilePhotoMenu(showPhotoMenu);
+      $("#profileDrawer").focus();
+    }
+    function setProfilePhotoMenu(open) {
+      $("#profilePhotoMenu").hidden=!open;
+      $("#profileAvatarButton").setAttribute("aria-expanded",String(open));
+    }
+    function closeProfileDrawer() {
+      $("#profileBackdrop").classList.remove("open");
+      $("#profileBackdrop").setAttribute("aria-hidden","true");
+      document.body.classList.remove("profile-open");
+    }
+    function logoutCurrentAccount() {
+      if(state.activeFocus) {
+        toast("Akhiri sesi fokus sebelum keluar dari akun.");
+        return false;
+      }
+      localStorage.removeItem("edunusa-auth-session");
+      sessionStorage.removeItem("edunusa-demo-session");
+      sessionStorage.removeItem("edunusa-local-session");
+      isDemoSession=false;
+      isLocalAccount=false;
+      currentAccountEmail="";
+      currentAccountKey="";
+      document.body.classList.remove("authenticated");
+      $("#authPassword").value="";
+      setAuthMode("login");
+      closeProfileDrawer();
+      return true;
+    }
+    async function restoreFirebaseSession() {
+      if(isDemoSession||isLocalAccount)return;
+      const session=readLocal("edunusa-auth-session",null);
+      if(!session?.idToken)return;
+      try {
+        const validSession=Number(session.expiresAt)<=Date.now()+30000?await refreshFirebaseSession(session):session;
+        if(isDemoSession)return;
+        const result=await firebaseAuthRequest("accounts:lookup",{idToken:validSession.idToken});
+        if(isDemoSession)return;
+        const user=result.users?.[0];
+        if(user?.emailVerified) {
+          isDemoSession=false;
+          enterAuthenticatedApp(user.email||session.email,user.localId||user.email||session.email);
+          return;
+        }
+        localStorage.removeItem("edunusa-auth-session");
+        setAuthMessage("Email belum diverifikasi. Buka tautan verifikasi di email, lalu masuk kembali.",true);
+      } catch(error) {
+        if(isDemoSession)return;
+        localStorage.removeItem("edunusa-auth-session");
+        setAuthMessage(error.message||"Sesi tidak dapat diverifikasi. Silakan masuk kembali.",true);
+      }
+    }
+    $("#demoLogin").addEventListener("click",()=>{
+      sessionStorage.setItem("edunusa-demo-session","true");
+      isDemoSession=true;
+      enterAuthenticatedApp("demo@zhennusa.local","demo-account");
+    });
+    $("#sidebarProfileButton").addEventListener("click",()=>openProfileDrawer());
+    $("#sidebarAvatar").addEventListener("click",event=>{event.stopPropagation();openProfileDrawer(true);});
+    $("#mobileProfileButton").addEventListener("click",()=>openProfileDrawer(true));
+    $("#profileAvatarButton").addEventListener("click",()=>setProfilePhotoMenu($("#profilePhotoMenu").hidden));
+    $("#closeProfile").addEventListener("click",closeProfileDrawer);
+    $("#profileBackdrop").addEventListener("click",event=>{if(event.target.id==="profileBackdrop")closeProfileDrawer();});
+    $("#chooseProfilePhoto").addEventListener("click",()=>{setProfilePhotoMenu(false);$("#profileGalleryInput").click();});
+    $("#captureProfilePhoto").addEventListener("click",()=>{setProfilePhotoMenu(false);$("#profileCameraInput").click();});
+    $("#removeProfilePhoto").addEventListener("click",()=>{
+      const profile=readLocal(currentProfileStorageKey(),{});
+      delete profile.photoDataUrl;
+      try {
+        localStorage.setItem(currentProfileStorageKey(),JSON.stringify(profile));
+        renderCurrentProfile();
+        setProfilePhotoMenu(false);
+        setProfileMessage("Foto profil dihapus dari browser ini.");
+      } catch(error) {
+        setProfileMessage("Foto tidak dapat dihapus: "+error.message,true);
+      }
+    });
+    async function prepareProfilePhoto(file) {
+      if(!file)return;
+      if(!file.type.startsWith("image/"))throw new Error("Pilih file gambar yang valid.");
+      if(file.size>8*1024*1024)throw new Error("Ukuran foto maksimal 8 MB.");
+      const source=await new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=()=>resolve(reader.result);
+        reader.onerror=()=>reject(new Error("Foto tidak dapat dibaca."));
+        reader.readAsDataURL(file);
+      });
+      const image=await new Promise((resolve,reject)=>{
+        const item=new Image();
+        item.onload=()=>resolve(item);
+        item.onerror=()=>reject(new Error("File tersebut bukan gambar yang dapat dibuka."));
+        item.src=source;
+      });
+      const size=256;
+      const scale=Math.max(size/image.width,size/image.height);
+      const width=Math.round(image.width*scale);
+      const height=Math.round(image.height*scale);
+      const canvas=document.createElement("canvas");
+      canvas.width=size;
+      canvas.height=size;
+      const context=canvas.getContext("2d");
+      if(!context)throw new Error("Browser tidak dapat memproses foto.");
+      context.drawImage(image,(size-width)/2,(size-height)/2,width,height);
+      return canvas.toDataURL("image/jpeg",.82);
+    }
+    async function saveSelectedProfilePhoto(input) {
+      const file=input.files?.[0];
+      input.value="";
+      if(!file)return;
+      try {
+        const photoDataUrl=await prepareProfilePhoto(file);
+        const profile=readLocal(currentProfileStorageKey(),{});
+        profile.photoDataUrl=photoDataUrl;
+        localStorage.setItem(currentProfileStorageKey(),JSON.stringify(profile));
+        renderCurrentProfile();
+        setProfileMessage("Foto profil berhasil diperbarui di perangkat ini.");
+      } catch(error) {
+        setProfileMessage(error.message||"Foto tidak dapat disimpan.",true);
+      }
+    }
+    $("#profileGalleryInput").addEventListener("change",event=>saveSelectedProfilePhoto(event.currentTarget));
+    $("#profileCameraInput").addEventListener("change",event=>saveSelectedProfilePhoto(event.currentTarget));
+    $("#profileDetailsForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      const displayName=$("#profileNameInput").value.trim();
+      if(!displayName) {
+        setProfileMessage("Masukkan nama tampilan terlebih dahulu.",true);
+        return;
+      }
+      const profile=readLocal(currentProfileStorageKey(),{});
+      profile.displayName=displayName;
+      try {
+        localStorage.setItem(currentProfileStorageKey(),JSON.stringify(profile));
+        renderCurrentProfile();
+        setProfileMessage("Profil berhasil disimpan di browser ini.");
+      } catch(error) {
+        setProfileMessage("Profil tidak dapat disimpan: "+error.message,true);
+      }
+    });
+    $("#changeEmailForm").addEventListener("submit",async event=>{
+      event.preventDefault();
+      const newEmail=$("#newAccountEmail").value.trim();
+      if(!newEmail||newEmail.toLocaleLowerCase("en")===currentAccountEmail.toLocaleLowerCase("en")) {
+        setProfileMessage("Masukkan Gmail baru yang berbeda dari email saat ini.",true);
+        return;
+      }
+      const button=$("#changeEmailForm button[type=submit]");
+      button.disabled=true;
+      try {
+        const session=await getCurrentFirebaseSession();
+        await firebaseAuthRequest("accounts:sendOobCode",{requestType:"VERIFY_AND_CHANGE_EMAIL",idToken:session.idToken,newEmail});
+        setProfileMessage("Tautan verifikasi dikirim ke "+newEmail+". Buka email itu untuk menyelesaikan perubahan.");
+      } catch(error) {
+        setProfileMessage(error.message||"Tautan verifikasi tidak dapat dikirim.",true);
+      } finally {
+        button.disabled=false;
+      }
+    });
+    $("#resetPasswordForm").addEventListener("submit",async event=>{
+      event.preventDefault();
+      const button=$("#resetPasswordForm button[type=submit]");
+      button.disabled=true;
+      try {
+        await firebaseAuthRequest("accounts:sendOobCode",{requestType:"PASSWORD_RESET",email:currentAccountEmail});
+        setProfileMessage("Tautan reset kata sandi dikirim ke "+currentAccountEmail+". Periksa inbox dan folder spam.");
+      } catch(error) {
+        setProfileMessage(error.message||"Tautan reset kata sandi tidak dapat dikirim.",true);
+      } finally {
+        button.disabled=false;
+      }
+    });
+    $("#switchAccountButton").addEventListener("click",()=>logoutCurrentAccount());
+    $("#profileLogoutButton").addEventListener("click",()=>logoutCurrentAccount());
+    $("#deleteAccountButton").addEventListener("click",async()=>{
+      if(state.activeFocus) {
+        toast("Akhiri sesi fokus sebelum menghapus akun.");
+        return;
+      }
+      const prompt=isLocalAccount
+        ?"Hapus akun lokal dan profilnya dari browser ini? Data akun tidak bisa dipulihkan."
+        :isDemoSession
+          ?"Keluar dari demo dan hapus nama/foto profil demo yang tersimpan di browser ini?"
+          :"Hapus akun Firebase secara permanen? Tindakan ini tidak dapat dibatalkan.";
+      if(!window.confirm(prompt))return;
+      const profileKey=currentProfileStorageKey();
+      const button=$("#deleteAccountButton");
+      button.disabled=true;
+      try {
+        if(isLocalAccount) {
+          const accounts=readLocalAccounts();
+          delete accounts[localAccountStorageKey(currentAccountEmail)];
+          localStorage.setItem("zhennusa-local-accounts",JSON.stringify(accounts));
+          sessionStorage.removeItem("edunusa-local-session");
+        } else if(!isDemoSession) {
+          const session=await getCurrentFirebaseSession();
+          await firebaseAuthRequest("accounts:delete",{idToken:session.idToken});
+          localStorage.removeItem("edunusa-auth-session");
+        }
+        localStorage.removeItem(profileKey);
+        isDemoSession=false;
+        isLocalAccount=false;
+        logoutCurrentAccount();
+        toast("Akun dan profil lokal berhasil dihapus.");
+      } catch(error) {
+        setProfileMessage(error.message||"Akun tidak dapat dihapus.",true);
+      } finally {
+        button.disabled=false;
+      }
+    });
+    $("#authToggle").addEventListener("click",()=>setAuthMode($("#authForm").dataset.mode==="signup"?"login":"signup"));
+    $("#authForm").addEventListener("submit",async event=>{
+      event.preventDefault();
+      const form=$("#authForm");
+      const mode=form.dataset.mode||"login";
+      const email=$("#authEmail").value.trim();
+      const passphrase=$("#authPassword").value;
+      if(mode==="signup"&&passphrase!==$("#authConfirmPassword").value) {
+        setAuthMessage("Kata sandi dan konfirmasi belum sama.",true);
+        return;
+      }
+      const submit=$("#authSubmit");
+      submit.disabled=true;
+      submit.textContent=mode==="signup"?"Membuat akun…":"Memeriksa akun…";
+      setAuthMessage("");
+      try {
+        if(mode==="signup") {
+          const accountKey=localAccountStorageKey(email);
+          const accounts=readLocalAccounts();
+          if(accounts[accountKey])throw new Error("Akun lokal dengan email ini sudah ada di browser. Silakan masuk.");
+          const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+          const passwordHash=await hashLocalPassword(passphrase,salt);
+          accounts[accountKey]={email,salt,passwordHash,createdAt:new Date().toISOString()};
+          localStorage.setItem("zhennusa-local-accounts",JSON.stringify(accounts));
+          sessionStorage.setItem("edunusa-local-session",accountKey);
+          isDemoSession=false;
+          isLocalAccount=true;
+          enterAuthenticatedApp(email,accountKey);
+          toast("Akun lokal dibuat. Akun hanya tersimpan di browser ini.");
+        } else {
+          const accountKey=localAccountStorageKey(email);
+          const localAccount=readLocalAccounts()[accountKey];
+          if(localAccount) {
+            const passwordHash=await hashLocalPassword(passphrase,localAccount.salt);
+            if(passwordHash!==localAccount.passwordHash)throw new Error("Email atau kata sandi akun lokal salah.");
+            sessionStorage.setItem("edunusa-local-session",accountKey);
+            isDemoSession=false;
+            isLocalAccount=true;
+            enterAuthenticatedApp(localAccount.email||email,accountKey);
+            return;
+          }
+          const account=await firebaseAuthRequest("accounts:signInWithPassword",{email,password:passphrase,returnSecureToken:true});
+          const user=await firebaseAuthRequest("accounts:lookup",{idToken:account.idToken});
+          if(!user.users?.[0]?.emailVerified) {
+            await sendFirebaseVerification(account.idToken);
+            setAuthMessage("Email belum diverifikasi. Tautan verifikasi baru telah dikirim. Buka email terlebih dahulu, lalu masuk kembali.",true);
+            return;
+          }
+          localStorage.setItem("edunusa-auth-session",JSON.stringify({idToken:account.idToken,refreshToken:account.refreshToken,email:account.email,expiresAt:Date.now()+Number(account.expiresIn)*1000}));
+          isDemoSession=false;
+          isLocalAccount=false;
+          enterAuthenticatedApp(account.email||email,account.localId||email);
+        }
+      } catch(error) {
+        setAuthMessage(error.message||"Tidak dapat terhubung ke Firebase. Periksa koneksi dan pengaturan proyek.",true);
+      } finally {
+        submit.disabled=false;
+        submit.textContent=form.dataset.mode==="signup"?"Buat akun":"Masuk";
+      }
+    });
+    $("#logoutButton").addEventListener("click",logoutCurrentAccount);
+    function toast(message) {
+      const el=$("#toast"); el.textContent=message; el.classList.add("show");
+      clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.remove("show"),2400);
+    }
+    function addCompanionMessage(text, sender) {
+      const message=document.createElement("div");
+      message.className=`companion-message ${sender}`;
+      message.textContent=text;
+      $("#companionMessages").append(message);
+      $("#companionMessages").scrollTop=$("#companionMessages").scrollHeight;
+      if(sender==="bot") animateMascot("talking",Math.min(4200,Math.max(1200,text.length*18)));
+    }
+    function animateMascot(mood, duration=1400) {
+      $$(".companion-mascot").forEach(mascot=>{
+        mascot.classList.remove("is-talking","is-thinking","is-waving");
+        mascot.classList.add(`is-${mood}`);
+        if(mascot.moodTimer)clearTimeout(mascot.moodTimer);
+        if(mood!=="idle") mascot.moodTimer=setTimeout(()=>mascot.classList.remove(`is-${mood}`),duration);
+      });
+    }
+    function openCompanion() {
+      const panel=$("#companionPanel");
+      panel.classList.add("open");
+      panel.setAttribute("aria-hidden","false");
+      $("#companionLaunch").setAttribute("aria-expanded","true");
+      if(!state.companionStarted) {
+        state.companionStarted=true;
+        addCompanionMessage("Hai, Nadia! 👋 Aku TemanNusa, teman ngobrol dan pendamping belajarmu. Mau cerita tentang harimu, menyusun rencana belajar, atau memahami materi? Kita bahas pelan-pelan, ya 💙","bot");
+      }
+      animateMascot("waving",1900);
+      $("#companionInput").focus();
+    }
+    function closeCompanion() {
+      $("#companionPanel").classList.remove("open");
+      $("#companionPanel").setAttribute("aria-hidden","true");
+      $("#companionLaunch").setAttribute("aria-expanded","false");
+      $("#companionLaunch").focus();
+    }
+    function companionResponse(message) {
+      const text=message.toLocaleLowerCase("id");
+      if(/bunuh diri|menyakiti diri|ingin mati|tidak ingin hidup/.test(text)) {
+        return "Aku ikut prihatin kamu sedang merasakan hal seberat ini. Kamu pantas mendapat bantuan langsung dan tidak perlu menghadapinya sendirian. Tolong segera hubungi orang dewasa yang kamu percaya—orang tua/wali, guru BK, atau petugas kesehatan—dan tetap bersama seseorang yang bisa menemanimu. Jika ada bahaya langsung, hubungi layanan darurat setempat sekarang.";
+      }
+      if(/stres|stress|cemas|takut|sedih|capek|lelah|kewalahan|bingung|sendiri/.test(text)) {
+        return "Terima kasih sudah cerita kepadaku 💙 Kedengarannya ini terasa berat buatmu. Perasaanmu valid—kita nggak harus menyelesaikan semuanya sekaligus. Coba tarik napas pelan, lalu ceritakan: hal apa yang paling mengganggu pikiranmu sekarang? Kalau ini terasa terus-menerus atau membuatmu tidak aman, bicaralah juga dengan orang dewasa yang kamu percaya atau guru BK.";
+      }
+      if(/rencana|jadwal|belajar|ujian|tugas|fokus|prokrastinasi|menunda/.test(text)) {
+        return "Yuk bikin langkah yang ringan dan realistis 📚\n1. Pilih satu tugas paling penting.\n2. Kerjakan 20 menit tanpa distraksi.\n3. Istirahat 5 menit, lalu cek progresmu.\n\nMata pelajaran atau tugas apa yang ingin kamu mulai? Aku bisa bantu pecah jadi langkah-langkah kecil.";
+      }
+      if(/matematika|biologi|fisika|kimia|sejarah|inggris|indonesia|materi|jelaskan|rumus|pelajaran/.test(text)) {
+        const subject=courses.find(course=>text.includes(course.name.toLocaleLowerCase("id"))||text.includes(course.category.toLocaleLowerCase("id")));
+        return `Boleh banget, kita pelajari bersama 😊${subject?` Untuk ${subject.name}, `:" "}Kirim topik, soal, atau bagian yang membingungkan. Aku akan mencoba menjelaskan langkah demi langkah dan membantu kamu memahami caranya, bukan sekadar memberi jawaban.`;
+      }
+      if(/terima kasih|makasih|thanks/.test(text)) return "Sama-sama, Nadia! Senang bisa menemanimu 😊 Kalau butuh bantuan belajar atau ingin cerita lagi, aku ada di sini. Semangat ya! ✨";
+      if(/halo|hai|hi\b|pagi|siang|sore|malam/.test(text)) return "Hai juga! 😊 Gimana kabarmu hari ini? Kamu boleh ngobrol santai, cerita yang sedang dipikirkan, atau minta ditemani belajar.";
+      if(/siapa kamu|namamu|temannusa/.test(text)) return "Aku TemanNusa, pendamping belajar di portal Zhennusa 🤖 Aku bisa bantu menyusun rencana belajar, membahas materi, atau mendengarkan ceritamu. Aku masih versi demo lokal, jadi jawabanku terbatas dan tidak dikirim ke layanan luar.";
+      if(/rekomendasi|saran/.test(text)) return "Aku siap bantu cari ide 😊 Kamu ingin saran tentang belajar, mengatur waktu, memahami pelajaran, atau ingin cerita dulu?";
+      return "Aku mendengarkan 😊 Ceritakan sedikit lagi supaya aku bisa menemanimu dengan lebih baik. Kamu ingin mencari solusi bersama, atau ingin didengarkan dulu?";
+    }
+    function sendCompanionMessage(text) {
+      const message=text.trim();
+      if(!message)return;
+      if(state.companionReplyTimer)clearTimeout(state.companionReplyTimer);
+      addCompanionMessage(message,"user");
+      $("#companionInput").value="";
+      $("#companionTyping").classList.add("show");
+      animateMascot("thinking",1200);
+      state.companionReplyTimer=setTimeout(()=>{
+        $("#companionTyping").classList.remove("show");
+        addCompanionMessage(companionResponse(message),"bot");
+        state.companionReplyTimer=null;
+      },450);
+    }
+    function resetCompanion() {
+      if(state.companionReplyTimer)clearTimeout(state.companionReplyTimer);
+      state.companionReplyTimer=null;
+      state.companionStarted=false;
+      $("#companionTyping").classList.remove("show");
+      $("#companionMessages").replaceChildren();
+      openCompanion();
+    }
+    function dateString() {
+      const date=new Intl.DateTimeFormat("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date());
+      return date.charAt(0).toLocaleUpperCase("id-ID")+date.slice(1);
+    }
+    function updateDashboardDate() {
+      const date=dateString();
+      $("#todayDate").textContent=date;
+      $("#todayScheduleDate").textContent=date;
+      renderDashboardSchedule();
+      if(state.page==="schedule")renderSchedulePage(state.scheduleDay);
+    }
+    function currentSchoolDay() {
+      const day=new Date().getDay();
+      return day===0?null:weekdayNames[day-1];
+    }
+    function dateForSchoolDay(dayName) {
+      const monday=new Date();
+      const mondayOffset=(monday.getDay()+6)%7;
+      monday.setDate(monday.getDate()-mondayOffset+weekdayNames.indexOf(dayName));
+      return new Intl.DateTimeFormat("id-ID",{day:"numeric",month:"long",year:"numeric"}).format(monday);
+    }
+    function createScheduleItem([time,subject,teacher,room,color]) {
+      const item=document.createElement("div");
+      item.className="schedule-item";
+      const timeLabel=document.createElement("span");
+      timeLabel.className="schedule-time";
+      timeLabel.textContent=time;
+      const bar=document.createElement("span");
+      bar.className=`schedule-bar${color&&color!=="purple"?` ${color}`:""}`;
+      if(color==="purple")bar.style.background="#a789e8";
+      const details=document.createElement("div");
+      const title=document.createElement("strong");
+      title.textContent=subject;
+      const location=document.createElement("small");
+      location.textContent=`${teacher} · ${room}`;
+      details.append(title,location);
+      item.append(timeLabel,bar,details);
+      return item;
+    }
+    function renderDashboardSchedule() {
+      const list=$("#dashboardScheduleList");
+      if(!list)return;
+      list.replaceChildren();
+      const day=currentSchoolDay();
+      const entries=day?weeklySchedule[day]:null;
+      if(!entries?.length) {
+        const empty=document.createElement("p");
+        empty.className="schedule-empty";
+        empty.textContent="Tidak ada jadwal pelajaran hari ini. Lihat jadwal Senin–Sabtu untuk hari lainnya.";
+        list.append(empty);
+        return;
+      }
+      entries.forEach(entry=>list.append(createScheduleItem(entry)));
+    }
+    function renderSchedulePage(dayName=state.scheduleDay||currentSchoolDay()||"Senin") {
+      state.scheduleDay=weekdayNames.includes(dayName)?dayName:"Senin";
+      const tabs=$("#scheduleWeekTabs");
+      tabs.replaceChildren();
+      weekdayNames.forEach(day=>{
+        const button=document.createElement("button");
+        button.type="button";
+        button.className=`schedule-day-tab${day===state.scheduleDay?" active":""}`;
+        button.dataset.scheduleDay=day;
+        button.setAttribute("role","tab");
+        button.setAttribute("aria-selected",String(day===state.scheduleDay));
+        button.textContent=day;
+        tabs.append(button);
+      });
+      $("#scheduleDayHeading").textContent=`${state.scheduleDay} · ${dateForSchoolDay(state.scheduleDay)}`;
+      const list=$("#schedulePageList");
+      list.replaceChildren();
+      weeklySchedule[state.scheduleDay].forEach(entry=>list.append(createScheduleItem(entry)));
+    }
+    function searchHistoryStorageKey() {
+      return `zhennusa-search-history:${encodeURIComponent(currentAccountKey||"guest")}`;
+    }
+    function readSearchHistory() {
+      const history=readLocal(searchHistoryStorageKey(),[]);
+      return Array.isArray(history)?history.filter(query=>typeof query==="string"):[];
+    }
+    function renderSearchHistory(show=true) {
+      const panel=$("#searchHistoryPanel");
+      const history=readSearchHistory();
+      panel.replaceChildren();
+      panel.hidden=!show;
+      const heading=document.createElement("div");
+      heading.className="search-history-head";
+      const label=document.createElement("span");
+      label.textContent="Riwayat pencarian";
+      heading.append(label);
+      if(history.length) {
+        const clear=document.createElement("button");
+        clear.type="button";
+        clear.className="search-history-clear";
+        clear.dataset.searchClear="true";
+        clear.textContent="Hapus semua";
+        heading.append(clear);
+      }
+      panel.append(heading);
+      if(!history.length) {
+        const empty=document.createElement("div");
+        empty.className="search-history-head";
+        empty.textContent="Pencarian yang kamu kirim akan tampil di sini.";
+        panel.append(empty);
+        return;
+      }
+      history.forEach(query=>{
+        const row=document.createElement("div");
+        row.className="search-history-item";
+        const button=document.createElement("button");
+        button.type="button";
+        button.className="search-history-query";
+        button.dataset.searchQuery=query;
+        button.textContent=`⌕  ${query}`;
+        button.setAttribute("aria-label",`Cari lagi: ${query}`);
+        const remove=document.createElement("button");
+        remove.type="button";
+        remove.className="search-history-remove";
+        remove.dataset.searchRemove=query;
+        remove.setAttribute("aria-label",`Hapus riwayat ${query}`);
+        remove.textContent="×";
+        row.append(button,remove);
+        panel.append(row);
+      });
+    }
+    function saveSearchHistory(query) {
+      const value=query.trim();
+      if(!value)return;
+      try {
+        const history=readSearchHistory().filter(item=>item.toLocaleLowerCase("id")!==value.toLocaleLowerCase("id"));
+        localStorage.setItem(searchHistoryStorageKey(),JSON.stringify([value,...history].slice(0,10)));
+        renderSearchHistory(true);
+      } catch(error) {
+        toast("Riwayat pencarian tidak dapat disimpan: "+error.message);
+      }
+    }
+    function courseMarkup(course, compact=false) {
+      if(compact) return `<button class="course-row" type="button" data-course="${course.name}" aria-label="Lanjutkan belajar ${course.name}"><span class="course-art ${course.style}">${course.icon}</span><span class="course-details"><strong>${course.name}</strong><small>${course.teacher} · ${course.done}/${course.lessons} materi</small><span class="progress-track"><span class="progress-value ${course.style==="science"?"teal":course.style==="math"?"orange":""}" style="width:${course.progress}%"></span></span></span><span class="course-percent">${course.progress}%</span></button>`;
+      const action=course.progress>0?"Lanjutkan belajar":"Mulai belajar";
+      return `<article class="catalog-card"><div class="catalog-banner" style="background:${course.style==="math"?"#fff0dc":course.style==="science"?"#e1f6f1":"#eee9ff"}"><span>${course.icon}</span></div><div class="catalog-body"><h3>${course.name}</h3><p>${course.teacher} · ${course.group} · ${course.topics.length} materi</p><div class="progress-track"><div class="progress-value ${course.style==="science"?"teal":course.style==="math"?"orange":""}" style="width:${course.progress}%"></div></div><div class="catalog-meta"><span>${course.done}/${course.lessons} materi · ${course.progress}%</span><button class="button-primary" data-course="${course.name}">${action} →</button></div></div></article>`;
+    }
+    function syncCourseProgress() {
+      courses.forEach(course=>{
+        const completed=completedLessons(course);
+        course.lessons=course.topics.length;
+        course.done=completed.size;
+        course.progress=Math.round(course.done/course.lessons*100);
+      });
+    }
+    function renderCourses() {
+      syncCourseProgress();
+      $("#homeCourses").innerHTML=courses.slice(0,3).map(course=>courseMarkup(course,true)).join("");
+      const totalLessons=courses.reduce((sum,course)=>sum+course.lessons,0);
+      const totalDone=courses.reduce((sum,course)=>sum+course.done,0);
+      $("#learningClassCount").textContent=`${courses.length} kelas`;
+      $("#learningDoneCount").textContent=`${totalDone}/${totalLessons} materi`;
+      $("#learningOverallProgress").textContent=`${Math.round(totalDone/totalLessons*100)}%`;
+      $("#courseSearch").value=state.search;
+      const query=state.search.toLocaleLowerCase("id");
+      const list=courses.filter(course=>(state.courseFilter==="Semua"||course.group===state.courseFilter||course.category===state.courseFilter)&&(!query||`${course.name} ${course.teacher} ${course.category}`.toLocaleLowerCase("id").includes(query)));
+      $("#courseCatalog").innerHTML=list.length?list.map(course=>courseMarkup(course)).join(""):'<div class="empty-state" style="grid-column:1/-1">Kelas tidak ditemukan. Coba kata kunci yang berbeda.</div>';
+    }
+    function completedLessons(course) {
+      if(isDemoSession)return new Set(course.topics.map((_,index)=>index));
+      const saved=state.studyProgress[course.name];
+      return new Set(Array.isArray(saved)?saved.filter(index=>Number.isInteger(index)&&index>=0&&index<course.topics.length):[]);
+    }
+    function renderLessonList(course) {
+      const completed=completedLessons(course);
+      $("#lessonList").innerHTML=course.topics.map((topic,index)=>`<button class="lesson-list-item ${index===state.lessonIndex?"active":""} ${completed.has(index)?"done":""}" data-lesson-index="${index}"><span class="lesson-list-index">${completed.has(index)?"✓":String(index+1).padStart(2,"0")}</span><span class="lesson-list-title">${topic}</span><span class="lesson-duration">${8+index*3} mnt</span></button>`).join("");
+    }
+    function renderLessonReader(course) {
+      const index=state.lessonIndex;
+      const topic=course.topics[index];
+      $("#lessonReader").innerHTML=`<div class="lesson-meta"><span>📖 Materi ${index+1} dari ${course.topics.length}</span><span>◷ ${8+index*3} menit</span></div>
+        <h3>${topic}</h3>
+        <div class="lesson-body">
+          <p>Selamat belajar! Pada materi ini, kita akan mengenal <strong>${topic.toLocaleLowerCase("id")}</strong> sebagai bagian penting dari ${course.name}. Pahami ide utamanya terlebih dahulu, kemudian hubungkan dengan contoh yang kamu temui di kelas maupun kehidupan sehari-hari.</p>
+          <div class="lesson-callout"><strong>Tujuan belajar</strong><br>Kamu dapat menjelaskan konsep <em>${topic.toLocaleLowerCase("id")}</em> dengan kata-katamu sendiri dan mencoba menerapkannya pada sebuah latihan.</div>
+          <p style="margin-top:13px"><strong>Langkah belajar yang disarankan:</strong></p>
+          <ul><li>Catat istilah atau fakta penting dari penjelasan guru.</li><li>Perhatikan contoh, lalu coba kerjakan kembali tanpa melihat jawabannya.</li><li>Jelaskan kembali konsep ini seolah-olah kamu sedang mengajarkannya kepada teman.</li></ul>
+          <p><strong>Contoh latihan:</strong> tuliskan satu hal yang sudah kamu pahami tentang ${topic.toLocaleLowerCase("id")} dan satu pertanyaan yang masih ingin kamu tanyakan.</p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--blue-pale)"><div><strong style="display:block;font-size:10px">Butuh fokus untuk mengerjakan?</strong><small style="color:var(--muted);font-size:9px">Buka halaman khusus dengan timer dan perlindungan salin-tempel.</small></div><button class="button-primary" data-start-focus type="button">Mulai sesi fokus →</button></div>
+        `;
+    }
+    function renderAssignments(course) {
+      const tasks=[course.assignment,`Rangkuman: ${course.topics[course.topics.length-1]}`];
+      $("#assignmentList").innerHTML=tasks.map((title,index)=>{
+        const key=`${course.name}:${index}`;
+        const submission=state.assignmentSubmissions[key];
+        const uploading=state.assignmentUploads.has(key);
+        const status=submission?`Terkirim ke guru · ${submission.submittedAtLabel}`:index?"Latihan mandiri · Tidak ada batas waktu":"Latihan kelas · Unggah foto hasil tugas";
+        return `<div class="assignment-card"><span class="assignment-icon">${index?"✏️":"📝"}</span><div><strong>${title}</strong><small>${status}</small></div><input class="assignment-photo-input" type="file" accept="image/*" data-assignment-photo="${index}" data-course-name="${course.name}" aria-label="Pilih foto ${title}"><button class="button-primary" type="button" data-assignment-upload="${index}" data-course-name="${course.name}" ${uploading?"disabled":""}>${uploading?"Mengirim foto…":submission?"Kirim ulang foto":"Unggah & kirim foto"}</button></div>`;
+      }).join("");
+      $("#assignmentList").insertAdjacentHTML("beforeend",'<p class="assignment-upload-note">Pilih foto tugas. Foto dan informasi nama siswa, tugas, serta waktu pengumpulan akan dikirim otomatis ke WhatsApp guru setelah server mengonfirmasi pengiriman.</p>');
+    }
+    function renderUpcomingTasks() {
+      const container=$("#taskList");
+      container.replaceChildren();
+      upcomingTasks.forEach(task=>{
+        const completed=Boolean(state.assignmentSubmissions[`${task.courseName}:0`]);
+        const label=document.createElement("label");
+        label.className=`task${completed?" done":""}`;
+        const checkbox=document.createElement("input");
+        checkbox.type="checkbox";
+        checkbox.checked=completed;
+        checkbox.disabled=true;
+        checkbox.setAttribute("aria-label",`${task.title}: ${completed?"selesai":"belum selesai"}`);
+        const description=document.createElement("span");
+        description.append(document.createTextNode(task.title));
+        const due=document.createElement("small");
+        due.textContent=`${task.courseName} · ${task.due}`;
+        description.append(due);
+        label.append(checkbox,description);
+        container.append(label);
+      });
+    }
+    function renderAcademicResults() {
+      const validResults=state.academicResults.map(result=>{
+        const score=Number(result.score);
+        const total=Number(result.total);
+        const completedAt=new Date(result.completedAt);
+        if(!Number.isFinite(score)||!Number.isFinite(total)||total<=0||!Number.isFinite(completedAt.getTime()))return null;
+        const correct=Number.isFinite(Number(result.correct))?Number(result.correct):score;
+        const unanswered=Number.isFinite(Number(result.unanswered))?Math.max(0,Number(result.unanswered)):0;
+        const incorrect=Number.isFinite(Number(result.incorrect))?Number(result.incorrect):Math.max(0,total-correct-unanswered);
+        return {...result,score,total,correct,incorrect,unanswered,completedAt:completedAt.toISOString()};
+      }).filter(Boolean);
+      const byCourse=courses.map(course=>{
+        const history=validResults
+          .filter(result=>result.courseName===course.name)
+          .sort((a,b)=>new Date(b.completedAt).getTime()-new Date(a.completedAt).getTime());
+        return {course,history,latest:history[0]||null};
+      });
+      const graded=byCourse.filter(item=>item.latest);
+      const average=graded.length
+        ?graded.reduce((sum,item)=>sum+item.latest.score/item.latest.total*100,0)/graded.length
+        :null;
+      const totalScore=validResults.reduce((sum,result)=>sum+result.score,0);
+      const possibleScore=validResults.reduce((sum,result)=>sum+result.total,0);
+      const totalAverage=possibleScore?totalScore/possibleScore*100:null;
+      const attempts=validResults.length;
+      const totalCorrect=validResults.reduce((sum,result)=>sum+result.correct,0);
+      const totalIncorrect=validResults.reduce((sum,result)=>sum+result.incorrect,0);
+      const passed=validResults.filter(result=>result.passed).length;
+      const summaries=[
+        {label:"Rata-rata nilai terbaru",value:average===null?"—":`${average.toFixed(1).replace(".",",")}%`},
+        {label:"Mata pelajaran bernilai",value:`${graded.length}/${courses.length}`},
+        {label:"Total poin seluruh tes",value:attempts?`${totalScore}/${possibleScore}`:"—"},
+        {label:"Rata-rata semua tes fokus",value:totalAverage===null?"—":`${totalAverage.toFixed(1).replace(".",",")}%`},
+        {label:"Jumlah tes fokus",value:String(attempts)},
+        {label:"Jawaban benar / salah",value:`${totalCorrect} / ${totalIncorrect}`},
+        {label:"Materi lulus",value:String(passed)}
+      ];
+      const summary=$("#academicSummary");
+      summary.replaceChildren();
+      summaries.forEach(item=>{
+        const card=document.createElement("article");
+        card.className="academic-summary-card";
+        const label=document.createElement("small");
+        label.textContent=item.label;
+        const value=document.createElement("strong");
+        value.textContent=item.value;
+        card.append(label,value);
+        summary.append(card);
+      });
+      const months=new Map();
+      validResults.forEach(result=>{
+        const date=new Date(result.completedAt);
+        const key=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
+        if(!months.has(key))months.set(key,[]);
+        months.get(key).push(result);
+      });
+      const monthlyList=$("#academicMonthlyList");
+      monthlyList.replaceChildren();
+      [...months.entries()].sort(([a],[b])=>b.localeCompare(a)).forEach(([key,results])=>{
+        const earned=results.reduce((sum,result)=>sum+result.score,0);
+        const possible=results.reduce((sum,result)=>sum+result.total,0);
+        const correct=results.reduce((sum,result)=>sum+result.correct,0);
+        const incorrect=results.reduce((sum,result)=>sum+result.incorrect,0);
+        const unanswered=results.reduce((sum,result)=>sum+result.unanswered,0);
+        const passedCount=results.filter(result=>result.passed).length;
+        const [year,month]=key.split("-").map(Number);
+        const monthCard=document.createElement("article");
+        monthCard.className="academic-month-card";
+        const head=document.createElement("div");
+        head.className="academic-month-head";
+        const heading=document.createElement("div");
+        const title=document.createElement("h3");
+        title.textContent=new Intl.DateTimeFormat("id-ID",{month:"long",year:"numeric"}).format(new Date(year,month-1,1));
+        const description=document.createElement("p");
+        description.textContent=`${results.length} tes fokus · rata-rata ${possible?(earned/possible*100).toFixed(1).replace(".",","):"0,0"}%`;
+        heading.append(title,description);
+        const total=document.createElement("strong");
+        total.className="academic-month-total";
+        total.textContent=`${earned}/${possible} poin`;
+        head.append(heading,total);
+        const stats=document.createElement("div");
+        stats.className="academic-month-stats";
+        [`${correct} benar`,` ${incorrect} salah`.trim(),`${unanswered} kosong`,`${passedCount} materi lulus`].forEach(text=>{
+          const item=document.createElement("span");
+          item.textContent=text;
+          stats.append(item);
+        });
+        const history=document.createElement("div");
+        history.className="academic-month-history";
+        results.sort((a,b)=>new Date(b.completedAt).getTime()-new Date(a.completedAt).getTime()).forEach(result=>{
+          const entry=document.createElement("div");
+          entry.className="academic-month-entry";
+          const detail=document.createElement("span");
+          const date=new Intl.DateTimeFormat("id-ID",{day:"numeric",month:"short",year:"numeric"}).format(new Date(result.completedAt));
+          detail.textContent=`${date} · ${result.courseName} · ${result.lessonTitle}`;
+          const grade=document.createElement("strong");
+          grade.textContent=`${result.score}/${result.total} (${Math.round(result.score/result.total*100)}%)`;
+          entry.append(detail,grade);
+          history.append(entry);
+        });
+        monthCard.append(head,stats,history);
+        monthlyList.append(monthCard);
+      });
+      if(!validResults.length) {
+        const empty=document.createElement("p");
+        empty.className="academic-empty";
+        empty.textContent="Belum ada hasil tes fokus untuk dirangkum. Selesaikan tes fokus di salah satu pelajaran, dan nilai beserta riwayat bulanannya akan muncul di sini.";
+        monthlyList.append(empty);
+      }
+      const list=$("#academicCourseList");
+      list.replaceChildren();
+      byCourse.forEach(({course,history,latest})=>{
+        const card=document.createElement("article");
+        card.className="academic-course-card";
+        const head=document.createElement("div");
+        head.className="academic-course-head";
+        const title=document.createElement("div");
+        title.className="academic-course-title";
+        const icon=document.createElement("span");
+        icon.className="academic-course-icon";
+        icon.textContent=course.icon;
+        const courseText=document.createElement("div");
+        const name=document.createElement("strong");
+        name.textContent=course.name;
+        const teacher=document.createElement("small");
+        teacher.textContent=course.teacher;
+        courseText.append(name,teacher);
+        title.append(icon,courseText);
+        const score=document.createElement("div");
+        score.className="academic-course-score";
+        const grade=document.createElement("strong");
+        grade.textContent=latest?`${latest.score}/${latest.total}`:"—";
+        const scoreLabel=document.createElement("small");
+        scoreLabel.className="academic-course-meta";
+        scoreLabel.textContent=latest?`${Math.round(latest.score/latest.total*100)}% · nilai terbaru`:"Belum ada nilai";
+        score.append(grade,scoreLabel);
+        head.append(title,score);
+        card.append(head);
+        if(latest) {
+          const progress=document.createElement("div");
+          progress.className="academic-course-progress";
+          const bar=document.createElement("span");
+          bar.style.width=`${Math.max(0,Math.min(100,latest.score/latest.total*100))}%`;
+          progress.append(bar);
+          const latestMeta=document.createElement("p");
+          latestMeta.className="academic-course-meta";
+          latestMeta.textContent=`Materi: ${latest.lessonTitle} · ${new Intl.DateTimeFormat("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(latest.completedAt))} · ${latest.correct} benar, ${latest.incorrect} salah${latest.unanswered?`, ${latest.unanswered} kosong`:""}`;
+          card.append(progress,latestMeta);
+          const historyList=document.createElement("div");
+          historyList.className="academic-course-history";
+          history.forEach((result,index)=>{
+            const entry=document.createElement("p");
+            const date=new Intl.DateTimeFormat("id-ID",{day:"numeric",month:"short",year:"numeric"}).format(new Date(result.completedAt));
+            entry.textContent=`${index===0?"Terbaru":`Sesi ${history.length-index}`} · ${date} · ${result.lessonTitle}: ${result.score}/${result.total} (${Math.round(result.score/result.total*100)}%)`;
+            historyList.append(entry);
+          });
+          card.append(historyList);
+        } else {
+          const empty=document.createElement("p");
+          empty.className="academic-course-meta";
+          empty.textContent="Selesaikan sesi fokus pada kelas ini untuk melihat nilai dan hasilnya.";
+          card.append(empty);
+        }
+        const openCourseButton=document.createElement("button");
+        openCourseButton.type="button";
+        openCourseButton.className="link-button";
+        openCourseButton.dataset.academicCourse=course.name;
+        openCourseButton.textContent="Buka kelas →";
+        card.append(openCourseButton);
+        list.append(card);
+      });
+      $("#dashboardAverageGrade").textContent=average===null?"—":`${average.toFixed(1).replace(".",",")}%`;
+    }
+    async function submitAssignmentPhoto(input) {
+      const file=input.files?.[0];
+      const index=Number(input.dataset.assignmentPhoto);
+      const course=courses.find(item=>item.name===input.dataset.courseName);
+      input.value="";
+      if(!file||!course||!Number.isInteger(index)||index<0||index>1)return;
+      if(isDemoSession||isLocalAccount) {
+        toast("Pengiriman tugas WhatsApp memerlukan akun Firebase dan server tugas yang sudah dikonfigurasi.");
+        return;
+      }
+      if(!file.type.startsWith("image/")) {
+        toast("Pilih file foto atau gambar yang valid.");
+        return;
+      }
+      if(file.size>5*1024*1024) {
+        toast("Ukuran foto tugas maksimal 5 MB.");
+        return;
+      }
+      const key=`${course.name}:${index}`;
+      if(state.assignmentUploads.has(key))return;
+      state.assignmentUploads.add(key);
+      renderAssignments(course);
+      try {
+        const session=await getCurrentFirebaseSession();
+        const profile=readLocal(currentProfileStorageKey(),{});
+        const studentName=profile.displayName||(currentAccountEmail.split("@")[0]||"Siswa");
+        const submittedAt=new Date();
+        const dateLabel=new Intl.DateTimeFormat("id-ID",{day:"numeric",month:"long",year:"numeric"}).format(submittedAt);
+        const timeLabel=new Intl.DateTimeFormat("id-ID",{hour:"2-digit",minute:"2-digit",hour12:false}).format(submittedAt);
+        const assignmentTitle=index===0?course.assignment:`Rangkuman: ${course.topics[course.topics.length-1]}`;
+        const message=`Siswa ${studentName} sudah mengerjakan tugas "${assignmentTitle}" pukul ${timeLabel} pada tanggal ${dateLabel}.`;
+        const body=new FormData();
+        body.append("photo",file,file.name);
+        body.append("courseName",course.name);
+        body.append("assignmentIndex",String(index));
+        body.append("assignmentTitle",assignmentTitle);
+        body.append("studentName",studentName);
+        body.append("studentEmail",currentAccountEmail);
+        body.append("submittedAt",submittedAt.toISOString());
+        body.append("message",message);
+        const response=await fetch(assignmentSubmissionEndpoint,{
+          method:"POST",
+          headers:{Authorization:`Bearer ${session.idToken}`},
+          body
+        });
+        let result;
+        try { result=await response.json(); }
+        catch { throw new Error("Server memberi respons yang tidak dapat dibaca."); }
+        if(!response.ok||result.success!==true) {
+          throw new Error(result.message||`Pengiriman gagal (HTTP ${response.status}).`);
+        }
+        const confirmedAt=result.submittedAt?new Date(result.submittedAt):submittedAt;
+        const submission={
+          submittedAt:confirmedAt.toISOString(),
+          submittedAtLabel:`${new Intl.DateTimeFormat("id-ID",{day:"numeric",month:"short",year:"numeric"}).format(confirmedAt)} · ${new Intl.DateTimeFormat("id-ID",{hour:"2-digit",minute:"2-digit",hour12:false}).format(confirmedAt)}`
+        };
+        state.assignmentSubmissions[key]=submission;
+        try {
+          localStorage.setItem("edunusa-assignment-submissions",JSON.stringify(state.assignmentSubmissions));
+        } catch(error) {
+          toast("Foto terkirim ke guru, tetapi status tidak dapat disimpan di browser: "+error.message);
+        }
+        toast("Foto dan informasi tugas berhasil dikirim ke WhatsApp guru ✅");
+      } catch(error) {
+        toast(error.message||"Foto tugas gagal dikirim. Coba lagi.");
+      } finally {
+        state.assignmentUploads.delete(key);
+        renderAssignments(course);
+        renderUpcomingTasks();
+      }
+    }
+    function renderCourseDetail() {
+      const course=courses.find(item=>item.name===state.openCourse);
+      if(!course)return;
+      syncCourseProgress();
+      const tint=course.style==="math"?"#fff0dc":course.style==="science"?"#e1f6f1":"#eee9ff";
+      $("#detailBreadcrumb").textContent=course.name;
+      $("#detailHero").innerHTML=`<div class="detail-title-row"><span class="detail-course-icon" style="background:${tint}">${course.icon}</span><div><h2>${course.name}</h2><p>${course.teacher} · Kelas XI-A · Semester ganjil</p></div></div><div class="detail-progress"><div class="detail-progress-line"><strong>Progres kelas</strong><span>${course.done}/${course.lessons} materi · ${course.progress}%</span></div><div class="progress-track"><div class="progress-value" style="width:${course.progress}%"></div></div></div>`;
+      renderLessonList(course);
+      renderLessonReader(course);
+      renderAssignments(course);
+      const note=state.courseNotes[course.name]||"";
+      if($("#courseNotes").value!==note)$("#courseNotes").value=note;
+      $("#notesStatus").textContent=note?"Catatan tersimpan di perangkat ini.":"Belum ada catatan.";
+      $("#downloadCourseNotes").disabled=!note.trim();
+    }
+    function openCourse(name) {
+      const course=courses.find(item=>item.name===name);
+      if(!course)return;
+      state.openCourse=name;
+      const completed=completedLessons(course);
+      state.lessonIndex=course.topics.findIndex((_,index)=>!completed.has(index));
+      if(state.lessonIndex<0)state.lessonIndex=0;
+      state.learningTab="materials";
+      $("#learningCatalogView").hidden=true;
+      $("#courseDetail").classList.add("active");
+      $$(".course-tab").forEach(tab=>{const active=tab.dataset.courseTab==="materials";tab.classList.toggle("active",active);tab.setAttribute("aria-selected",String(active));});
+      $$(".course-tab-panel").forEach(panel=>panel.classList.toggle("active",panel.id==="courseMaterialsPanel"));
+      renderCourseDetail();
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+    function closeCourse() {
+      state.openCourse=null;
+      $("#courseDetail").classList.remove("active");
+      $("#learningCatalogView").hidden=false;
+      renderCourses();
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+    function setCourseTab(tabName) {
+      state.learningTab=tabName;
+      $$(".course-tab").forEach(tab=>{const active=tab.dataset.courseTab===tabName;tab.classList.toggle("active",active);tab.setAttribute("aria-selected",String(active));});
+      $$(".course-tab-panel").forEach(panel=>panel.classList.toggle("active",panel.id===`course${tabName[0].toUpperCase()+tabName.slice(1)}Panel`));
+    }
+    function elapsedFocusMs() {
+      const session=state.activeFocus;
+      if(!session)return 0;
+      return session.elapsedMs+(session.startedAt?Date.now()-session.startedAt:0);
+    }
+    function remainingFocusMs() {
+      return Math.max(0,focusDurationMs-elapsedFocusMs());
+    }
+    function formatFocusTime(milliseconds) {
+      const total=Math.floor(milliseconds/1000);
+      const hours=String(Math.floor(total/3600)).padStart(2,"0");
+      const minutes=String(Math.floor(total%3600/60)).padStart(2,"0");
+      const seconds=String(total%60).padStart(2,"0");
+      return `${hours}:${minutes}:${seconds}`;
+    }
+    function saveFocusSession() {
+      if(!state.activeFocus)return;
+      state.activeFocus.elapsedMs=elapsedFocusMs();
+      state.activeFocus.startedAt=state.activeFocus.paused?null:Date.now();
+      sessionStorage.setItem("edunusa-focus-session",JSON.stringify(state.activeFocus));
+      $("#focusTimer").textContent=formatFocusTime(remainingFocusMs());
+      if(remainingFocusMs()===0)finishFocusSession(true);
+    }
+    function showFocusLock(message) {
+      $("#focusLockMessage").textContent=message;
+      $("#focusWarningCount").textContent=`Sesi dijeda ${state.activeFocus?.warnings||0} kali. Waktu jeda tidak dihitung.`;
+      $("#focusWorkView").inert=true;
+      $("#focusLock").hidden=false;
+      $("#focusLock").querySelector("[data-resume-focus]").focus();
+    }
+    function setFocusBackgroundLocked(locked) {
+      $$(".sidebar,.topbar,.mobile-nav,#learningCatalogView,#courseDetail,#companionLaunch,#companionPanel").forEach(element=>{
+        element.inert=locked;
+        if(locked)element.setAttribute("aria-hidden","true");
+        else element.removeAttribute("aria-hidden");
+      });
+    }
+    function renderFocusScreen() {
+      const session=state.activeFocus;
+      const course=session&&courses.find(item=>item.name===session.courseName);
+      if(!course)return;
+      const index=session.lessonIndex;
+      const topic=course.topics[index];
+      $("#focusCourseIcon").textContent=course.icon;
+      $("#focusCourseName").textContent=course.name;
+      $("#focusLessonNumber").textContent=`Materi ${index+1}`;
+      const questionSet=session.questionSet||focusQuestionBanks[course.name]||mathFocusQuestions;
+      const questionIndex=Math.min(session.questionIndex||0,questionSet.length-1);
+      const question=questionSet[questionIndex];
+      session.selectedAnswers=session.selectedAnswers||Array(questionSet.length).fill(null);
+      session.skippedAnswers=session.skippedAnswers||Array(questionSet.length).fill(false);
+      $("#focusQuestionCounter").textContent=`Soal ${questionIndex+1} dari ${questionSet.length}`;
+      $("#focusProgressBar").style.width=`${Math.round((questionIndex+1)/questionSet.length*100)}%`;
+      $("#focusTopic").textContent=`Latihan ${course.name} · ${topic}`;
+      $("#focusMaterial").innerHTML=`<strong>📖 Fokus materi</strong>${topic} · ${course.name}`;
+      $("#focusQuestion").textContent=question.question;
+      $("#focusAnswers").innerHTML=question.options.map((option,optionIndex)=>`<label class="focus-answer"><input type="radio" name="focusAnswer" value="${optionIndex}"><span>${option}</span></label>`).join("");
+      if(Number.isInteger(session.selectedAnswers[questionIndex])) {
+        const selected=$(`#focusAnswers input[value="${session.selectedAnswers[questionIndex]}"]`);
+        if(selected)selected.checked=true;
+      }
+      $("#focusQuestionNav").innerHTML=questionSet.map((_,navIndex)=>`<button type="button" class="${navIndex===questionIndex?"current ":""}${Number.isInteger(session.selectedAnswers[navIndex])?"answered":session.skippedAnswers[navIndex]?"skipped":""}" data-focus-question="${navIndex}" aria-label="Buka soal ${navIndex+1}${session.skippedAnswers[navIndex]&&!Number.isInteger(session.selectedAnswers[navIndex])?", belum dijawab":""}" ${navIndex===questionIndex?'aria-current="step"':""}>${navIndex+1}</button>`).join("");
+      const currentQuestionButton=$("#focusQuestionNav .current");
+      if(currentQuestionButton) {
+        const nav=$("#focusQuestionNav");
+        nav.scrollTo({left:currentQuestionButton.offsetLeft-(nav.clientWidth-currentQuestionButton.offsetWidth)/2,behavior:"smooth"});
+      }
+      $('[data-focus-action="previous"]').disabled=questionIndex===0;
+      $('[data-focus-action="next"]').hidden=questionIndex===questionSet.length-1;
+      $('[data-focus-action="finish"]').hidden=questionIndex!==questionSet.length-1;
+      $("#focusFeedback").textContent="";
+      $("#focusTimer").textContent=formatFocusTime(remainingFocusMs());
+      $("#focusWorkView").classList.add("active");
+      $("#focusWorkView").setAttribute("aria-hidden","false");
+      document.body.classList.add("focus-active");
+      setFocusBackgroundLocked(true);
+      $("#focusWorkView").inert=Boolean(session.locked);
+      $("#focusLock").hidden=!session.locked;
+      if(session.locked)showFocusLock(session.lockReason||"Sesi dijeda. Tekan tombol untuk melanjutkan.");
+    }
+    function startFocusSession() {
+      if(state.activeFocus)return;
+      const course=courses.find(item=>item.name===state.openCourse);
+      if(!course)return;
+      const bank=focusQuestionBanks[course.name];
+      if(!bank||bank.length!==30) {
+        toast(`Bank soal 30 butir untuk ${course.name} belum tersedia.`);
+        return;
+      }
+      const questionSet=bank.map(item=>{
+        const options=[...item.options].sort(()=>Math.random()-.5);
+        return {...item,options,answer:options.indexOf(item.options[item.answer])};
+      });
+      $("#focusWorkView").classList.remove("result-mode");
+      $("#focusWorkView").classList.add("focus-protected");
+      $("#focusWorkView .focus-brand small").textContent="Mode pengerjaan fokus";
+      $("#focusQuizView").hidden=false;
+      $("#focusResultView").hidden=true;
+      $("#focusFullscreen").hidden=false;
+      $('[data-focus-action="exit"]').hidden=false;
+      state.activeFocus={courseName:course.name,lessonIndex:state.lessonIndex,elapsedMs:0,startedAt:Date.now(),paused:false,locked:false,warnings:0,lockReason:"",questionIndex:0,selectedAnswers:Array(questionSet.length).fill(null),skippedAnswers:Array(questionSet.length).fill(false),questionSet,questionBankVersion:3};
+      renderFocusScreen();
+      saveFocusSession();
+      state.focusTimerInterval=setInterval(saveFocusSession,1000);
+      $("#focusWorkView").scrollTop=0;
+      $("#focusQuestionCard")?.focus();
+    }
+    function pauseFocusSession(reason) {
+      const session=state.activeFocus;
+      if(!session||session.paused)return;
+      session.elapsedMs=elapsedFocusMs();
+      session.startedAt=null;
+      session.paused=true;
+      session.locked=true;
+      session.warnings+=1;
+      session.lockReason=reason;
+      clearInterval(state.focusTimerInterval);
+      state.focusTimerInterval=null;
+      saveFocusSession();
+      showFocusLock(reason);
+    }
+    function resumeFocusSession() {
+      const session=state.activeFocus;
+      if(!session||document.hidden)return;
+      session.paused=false;
+      session.locked=false;
+      session.startedAt=Date.now();
+      $("#focusLock").hidden=true;
+      $("#focusWorkView").inert=false;
+      saveFocusSession();
+      clearInterval(state.focusTimerInterval);
+      state.focusTimerInterval=setInterval(saveFocusSession,1000);
+      $("#focusAnswers input")?.focus();
+    }
+    function recordFocusTime(session) {
+      const key=`${session.courseName}:${session.lessonIndex}`;
+      state.studyTime[key]=(state.studyTime[key]||0)+Math.floor(Math.min(session.elapsedMs,focusDurationMs)/1000);
+      localStorage.setItem("edunusa-study-time",JSON.stringify(state.studyTime));
+    }
+    const mathAnswerExplanations=[
+      "Substitusi x = 2 dan x = 3 menghasilkan 2² − 5(2) + 6 = 0 dan 3² − 5(3) + 6 = 0; keduanya adalah akar persamaan.",
+      "Bilangan 3 dan 4 berjumlah 7 dan hasil kalinya 12, jadi x² + 7x + 12 = (x + 3)(x + 4).",
+      "Untuk x² − 4x + 4, diskriminannya D = b² − 4ac = (−4)² − 4(1)(4) = 16 − 16 = 0.",
+      "Bentuk puncak y = (x − h)² + k memiliki titik puncak (h, k); di sini h = 2 dan k = 3.",
+      "Masukkan x = 4: f(4) = 4² − 3(4) + 2 = 16 − 12 + 2 = 6.",
+      "Sumbu simetri x = −b/(2a). Untuk a = 1 dan b = 6, x = −6/2 = −3.",
+      "Titik puncaknya berada di x = 4; y = 4² − 8(4) + 12 = 16 − 32 + 12 = −4, sehingga nilai minimumnya −4.",
+      "Akar 1 dan 5 memberi jumlah 6 dan hasil kali 5; bentuk persamaannya x² − 6x + 5 = 0.",
+      "Koefisien x² adalah a = −2. Karena a negatif, parabola membuka ke bawah.",
+      "x² − 9 = 0 berarti x² = 9, sehingga x = 3 atau x = −3.",
+      "Hasil kali akar persamaan ax² + bx + c = 0 adalah c/a. Di sini hasilnya −15/1 = −15.",
+      "Jumlah akar adalah −b/a = −(−6)/2 = 6/2 = 3.",
+      "Bilangan yang kuadratnya 49 adalah 7 dan −7, sebab 7² = 49 dan (−7)² = 49.",
+      "x² + 10x + 25 = x² + 2(5)x + 5², jadi bentuk kuadrat sempurnanya (x + 5)².",
+      "D = b² − 4ac = 2² − 4(1)(5) = 4 − 20 = −16. Karena D negatif, tidak ada akar real.",
+      "Masukkan x = 2: y = 2² − 4(2) + 1 = 4 − 8 + 1 = −3.",
+      "Titik potong sumbu-x terjadi saat y = 0: x² − 4 = 0, maka x² = 4 dan x = −2 atau x = 2.",
+      "Jumlah akar persamaan adalah 7 dan hasil kalinya 10. Jika satu akar 2, akar lain harus 5 karena 2 + 5 = 7 dan 2 × 5 = 10.",
+      "Titik puncak berada di x = 3; y = −3² + 6(3) − 5 = −9 + 18 − 5 = 4, sehingga nilai maksimumnya 4.",
+      "Koefisien x² adalah angka yang mengalikan x² secara langsung. Pada 3x² − 5x + 2, koefisiennya 3.",
+      "x² − 16 adalah selisih kuadrat x² − 4², sehingga faktornya (x − 4)(x + 4).",
+      "Masukkan x = −1: f(−1) = 2(−1)² + (−1) − 3 = 2 − 1 − 3 = −2.",
+      "Sumbu simetri x = −b/(2a). Dengan a = 2 dan b = −12, x = 12/4 = 3.",
+      "x² + 4x + 4 = (x + 2)². Jadi (x + 2)² = 0 dan akarnya x = −2 sebanyak dua kali (akar kembar).",
+      "Pada y = ax² + bx + c, tanda a menentukan arah buka parabola. Jika a > 0, parabola membuka ke atas.",
+      "D = b² − 4ac = (−2)² − 4(1)(−8) = 4 + 32 = 36.",
+      "x² + x − 12 = (x + 4)(x − 3), sehingga akarnya x = −4 dan x = 3.",
+      "Titik puncak berada di x = −1; y = (−1)² + 2(−1) − 3 = 1 − 2 − 3 = −4.",
+      "Persamaan monik dengan jumlah akar 6 dan hasil kali 8 adalah x² − 6x + 8 = 0, dari rumus x² − (jumlah akar)x + hasil kali akar.",
+      "Titik potong sumbu-y terjadi saat x = 0. Nilainya y = 0² + 1 = 1, jadi titiknya (0, 1)."
+    ];
+    function focusAnswerReason(question,courseName,index,correctAnswer) {
+      if(courseName==="Matematika")return mathAnswerExplanations[index];
+      if(question.explanation)return question.explanation;
+      const concepts={
+        "Biologi":"Sel, organel, jaringan, dan proses membran memiliki fungsi biologis tertentu; jawaban benar menyebut fungsi atau proses yang dijalankan, bukan fungsi milik bagian lain.",
+        "Bahasa Inggris":"Bentuk kata dan susunan kalimat harus mengikuti subjek, waktu, serta fungsi ungkapan; jawaban benar mengikuti aturan bahasa yang digunakan.",
+        "Fisika":"Besaran fisika harus dihitung dengan rumus yang tepat dan dinyatakan dalam satuan yang sesuai; jawaban benar mengikuti hubungan antarbesaran itu.",
+        "Sejarah Indonesia":"Jawaban benar menyebut tokoh, tempat, tanggal, atau tujuan yang tercatat dalam kronologi sejarah Indonesia, bukan peristiwa lain.",
+        "Bahasa Indonesia":"Jawaban benar mengikuti makna, struktur teks, atau kaidah bahasa Indonesia yang diminta; pilihan lain memiliki fungsi atau bentuk berbeda.",
+        "Kimia":"Jawaban benar mencerminkan jumlah partikel, susunan elektron, atau sifat zat berdasarkan konsep kimia yang dipelajari.",
+        "Ekonomi":"Jawaban benar mengikuti hubungan sebab-akibat antara harga, permintaan, penawaran, dan kebutuhan; perubahan satu faktor memengaruhi faktor lainnya.",
+        "Informatika":"Jawaban benar mengikuti urutan langkah logis atau fungsi komponen dalam sistem komputasi, bukan tindakan yang tidak berkaitan."
+      };
+      return concepts[courseName]||`Jawaban “${correctAnswer}” adalah fakta atau konsep yang tepat pada materi ${courseName}.`;
+    }
+    function renderFocusResult(session,score,completed,timeExpired) {
+      const questionSet=session.questionSet||mathFocusQuestions;
+      const correct=questionSet.reduce((total,question,index)=>total+(session.selectedAnswers[index]===question.answer?1:0),0);
+      const unanswered=session.selectedAnswers.filter(answer=>!Number.isInteger(answer)).length;
+      const incorrect=questionSet.length-correct-unanswered;
+      const course=courses.find(item=>item.name===session.courseName);
+      $("#focusResultTitle").textContent=timeExpired?"Waktu sesi habis":"Hasil sesi fokus";
+      $("#focusResultSummary").textContent=`${session.courseName} · ${course?.topics[session.lessonIndex]||"Materi"} · ${completed?"Materi berhasil diselesaikan.":"Nilai minimal 21 diperlukan untuk menandai materi selesai."}`;
+      const stats=$("#focusResultScore");
+      stats.replaceChildren();
+      [
+        {label:"Nilai keseluruhan",value:`${score}/${questionSet.length}`,className:""},
+        {label:"Jawaban benar",value:String(correct),className:"correct"},
+        {label:`Jawaban salah${unanswered?` · ${unanswered} kosong`:""}`,value:String(incorrect),className:"incorrect"}
+      ].forEach(stat=>{
+        const card=document.createElement("div");
+        card.className=`focus-result-stat ${stat.className}`.trim();
+        const value=document.createElement("strong");
+        value.textContent=stat.value;
+        const label=document.createElement("small");
+        label.textContent=stat.label;
+        card.append(value,label);
+        stats.append(card);
+      });
+      const review=$("#focusResultQuestions");
+      review.replaceChildren();
+      questionSet.forEach((question,index)=>{
+        const selected=session.selectedAnswers[index];
+        const isCorrect=selected===question.answer;
+        const unanswered=!Number.isInteger(selected);
+        const card=document.createElement("article");
+        card.className=`focus-result-question ${isCorrect?"correct":unanswered?"":"incorrect"}`.trim();
+        const heading=document.createElement("h3");
+        heading.textContent=`Soal ${index+1}. ${question.question}`;
+        const verdict=document.createElement("p");
+        verdict.className="focus-result-verdict";
+        verdict.textContent=isCorrect?"✓ Jawabanmu benar.":unanswered?"○ Belum dijawab.":"✗ Jawabanmu belum tepat.";
+        const chosen=document.createElement("p");
+        chosen.textContent=`Jawabanmu: ${unanswered?"Tidak dijawab":question.options[selected]}`;
+        const correctAnswer=document.createElement("p");
+        const explanation=focusAnswerReason(question,session.courseName,index,question.options[question.answer]);
+        correctAnswer.textContent=unanswered
+          ?`Jawaban benar adalah “${question.options[question.answer]}”. ${explanation}`
+          :isCorrect
+            ?`Benar, “${question.options[question.answer]}”. ${explanation}`
+            :`Jawaban yang benar “${question.options[question.answer]}”, bukan “${question.options[selected]}”, karena ${explanation.charAt(0).toLocaleLowerCase("id")}${explanation.slice(1)}`;
+        card.append(heading,verdict,chosen,correctAnswer);
+        review.append(card);
+      });
+    }
+    function showFocusQuestion(index) {
+      const session=state.activeFocus;
+      if(!session)return;
+      const questionSet=session.questionSet||mathFocusQuestions;
+      const nextIndex=Math.max(0,Math.min(index,questionSet.length-1));
+      const currentIndex=session.questionIndex||0;
+      if(nextIndex!==currentIndex) {
+        const leaveLast=nextIndex>currentIndex?nextIndex-1:currentIndex;
+        for(let skippedIndex=currentIndex;skippedIndex<=leaveLast;skippedIndex++) {
+          if(!Number.isInteger(session.selectedAnswers[skippedIndex]))session.skippedAnswers[skippedIndex]=true;
+        }
+      }
+      session.questionIndex=nextIndex;
+      saveFocusSession();
+      renderFocusScreen();
+    }
+    function endFocusSession(completed,score,timeExpired=false) {
+      const session=state.activeFocus;
+      if(!session)return;
+      const showResult=Number.isInteger(score);
+      session.elapsedMs=elapsedFocusMs();
+      session.startedAt=null;
+      recordFocusTime(session);
+      if(showResult) {
+        const questionSet=session.questionSet||mathFocusQuestions;
+        const correct=questionSet.reduce((total,question,index)=>total+(session.selectedAnswers[index]===question.answer?1:0),0);
+        const unanswered=session.selectedAnswers.filter(answer=>!Number.isInteger(answer)).length;
+        const result={
+          courseName:session.courseName,
+          lessonTitle:courses.find(item=>item.name===session.courseName)?.topics[session.lessonIndex]||"Materi",
+          score,
+          total:questionSet.length,
+          correct,
+          incorrect:questionSet.length-correct-unanswered,
+          unanswered,
+          passed:completed,
+          completedAt:new Date().toISOString()
+        };
+        state.academicResults.push(result);
+        try {
+          localStorage.setItem("edunusa-academic-results",JSON.stringify(state.academicResults));
+        } catch(error) {
+          toast("Hasil sesi tampil, tetapi nilai tidak dapat disimpan di browser: "+error.message);
+        }
+      }
+      if(completed&&!isDemoSession) {
+        const progress=completedLessons(courses.find(item=>item.name===session.courseName));
+        progress.add(session.lessonIndex);
+        state.studyProgress[session.courseName]=Array.from(progress);
+        localStorage.setItem("edunusa-study-progress",JSON.stringify(state.studyProgress));
+      }
+      clearInterval(state.focusTimerInterval);
+      state.focusTimerInterval=null;
+      state.activeFocus=null;
+      sessionStorage.removeItem("edunusa-focus-session");
+      $("#focusLock").hidden=true;
+      $("#focusWorkView").inert=false;
+      if(document.fullscreenElement)document.exitFullscreen().catch(()=>toast("Tekan Esc untuk keluar dari layar penuh."));
+      renderCourseDetail();
+      renderCourses();
+      if(showResult) {
+        $("#focusWorkView").classList.remove("focus-protected");
+        $("#focusWorkView").classList.add("result-mode","active");
+        $("#focusWorkView .focus-brand small").textContent="Hasil sesi fokus";
+        $("#focusWorkView").setAttribute("aria-label","Hasil dan pembahasan sesi fokus");
+        $("#focusWorkView").setAttribute("aria-hidden","false");
+        $("#focusQuizView").hidden=true;
+        $("#focusResultView").hidden=false;
+        $("#focusFullscreen").hidden=true;
+        $('[data-focus-action="exit"]').hidden=true;
+        document.body.classList.add("focus-active");
+        setFocusBackgroundLocked(true);
+        renderFocusResult(session,score,completed,timeExpired);
+        $("#focusWorkView").scrollTop=0;
+        toast(`${timeExpired?"Waktu habis. ":""}Nilai ${score}/${session.questionSet.length} · ${completed?"Materi selesai 🎉":"Materi belum selesai."}`);
+        return;
+      }
+      $("#focusWorkView").classList.remove("active","result-mode");
+      $("#focusWorkView").classList.add("focus-protected");
+      $("#focusWorkView .focus-brand small").textContent="Mode pengerjaan fokus";
+      $("#focusWorkView").setAttribute("aria-hidden","true");
+      $("#focusWorkView").setAttribute("aria-label","Sesi pengerjaan materi");
+      $("#focusQuizView").hidden=false;
+      $("#focusResultView").hidden=true;
+      $("#focusFullscreen").hidden=false;
+      $('[data-focus-action="exit"]').hidden=false;
+      document.body.classList.remove("focus-active");
+      setFocusBackgroundLocked(false);
+      toast("Sesi diakhiri. Waktu pengerjaan tersimpan.");
+    }
+    function showFocusConfirm(action,title,message,acceptLabel="Ya, selesaikan") {
+      state.focusConfirmAction=action;
+      $("#focusConfirmTitle").textContent=title;
+      $("#focusConfirmMessage").textContent=message;
+      $('[data-focus-confirm="accept"]').textContent=acceptLabel;
+      $("#focusConfirm").hidden=false;
+      $('[data-focus-confirm="cancel"]').focus();
+    }
+    function closeFocusConfirm() {
+      $("#focusConfirm").hidden=true;
+      state.focusConfirmAction=null;
+    }
+    function finishFocusSession(timeExpired=false,confirmed=false) {
+      const session=state.activeFocus;
+      if(!session)return;
+      const unanswered=session.selectedAnswers.filter(answer=>!Number.isInteger(answer)).length;
+      if(unanswered&&!timeExpired&&!confirmed) {
+        showFocusConfirm("finish","Masih ada soal kosong",`Kamu masih memiliki ${unanswered} soal yang belum dijawab. Kalau diselesaikan sekarang, hanya jawaban yang sudah dipilih yang akan dinilai.`);
+        return;
+      }
+      const questionSet=session.questionSet||mathFocusQuestions;
+      const score=questionSet.reduce((total,question,index)=>total+(session.selectedAnswers[index]===question.answer?1:0),0);
+      const passed=score>=21;
+      session.elapsedMs=elapsedFocusMs();
+      endFocusSession(passed,score,timeExpired);
+    }
+    function restoreFocusSession() {
+      const session=state.activeFocus;
+      const course=session&&courses.find(item=>item.name===session.courseName);
+      if(!session||!course||!Number.isInteger(session.lessonIndex)||session.lessonIndex<0||session.lessonIndex>=course.topics.length) {
+        state.activeFocus=null;
+        sessionStorage.removeItem("edunusa-focus-session");
+        return;
+      }
+      if(session.startedAt&&!session.paused)session.elapsedMs+=Math.max(0,Date.now()-session.startedAt);
+      session.elapsedMs=Math.min(session.elapsedMs,focusDurationMs);
+      session.startedAt=null;
+      session.paused=true;
+      session.locked=true;
+      session.warnings=(session.warnings||0)+1;
+      session.lockReason="Sesi sebelumnya terhenti atau halaman dimuat ulang. Sesi dijeda dan waktunya tidak berjalan.";
+      session.questionIndex=Number.isInteger(session.questionIndex)?session.questionIndex:0;
+      const bank=focusQuestionBanks[course.name]||mathFocusQuestions;
+      if(session.questionBankVersion!==3) {
+        session.questionSet=bank;
+        session.selectedAnswers=Array(bank.length).fill(null);
+        session.skippedAnswers=Array(bank.length).fill(false);
+        session.questionIndex=0;
+        session.questionBankVersion=3;
+      } else {
+        session.questionSet=bank;
+        session.selectedAnswers=Array.isArray(session.selectedAnswers)&&session.selectedAnswers.length===bank.length?session.selectedAnswers:Array(bank.length).fill(null);
+        session.skippedAnswers=Array.isArray(session.skippedAnswers)&&session.skippedAnswers.length===bank.length?session.skippedAnswers:Array(bank.length).fill(false);
+      }
+      state.activeFocus=null;
+      navigate("learning");
+      state.activeFocus=session;
+      state.openCourse=course.name;
+      state.lessonIndex=session.lessonIndex;
+      renderFocusScreen();
+      saveFocusSession();
+    }
+    function toggleLesson(index) {
+      const course=courses.find(item=>item.name===state.openCourse);
+      if(!course)return;
+      if(isDemoSession) {
+        toast("Mode demo menampilkan semua materi 100%. Progres akun asli tidak diubah.");
+        return;
+      }
+      const done=completedLessons(course);
+      if(done.has(index))done.delete(index);else done.add(index);
+      state.studyProgress[course.name]=Array.from(done);
+      localStorage.setItem("edunusa-study-progress",JSON.stringify(state.studyProgress));
+      renderCourseDetail();
+      renderCourses();
+      toast(done.has(index)?"Materi selesai, progresmu tersimpan! 🎉":"Status materi diperbarui.");
+    }
+    function renderInformation() {
+      const query=state.search.toLocaleLowerCase("id");
+      const list=announcements.filter(item=>(state.infoFilter==="Semua"||item.category===state.infoFilter)&&(!query||`${item.title} ${item.body} ${item.category}`.toLocaleLowerCase("id").includes(query)));
+      const container=$("#informationList");
+      container.replaceChildren();
+      if(!list.length) {
+        container.innerHTML='<div class="empty-state">Tidak ada informasi yang cocok dengan pencarianmu.</div>';
+        return;
+      }
+      list.forEach(item=>{
+        const card=document.createElement("article");
+        card.className="info-card";
+        const date=document.createElement("div");
+        date.className="info-date";
+        const day=document.createElement("strong");
+        day.textContent=item.day;
+        const month=document.createElement("small");
+        month.textContent=item.month;
+        date.append(day,month);
+        const button=document.createElement("button");
+        button.className="info-open-button";
+        button.type="button";
+        button.dataset.announcementId=item.id;
+        button.setAttribute("aria-label",`Baca pengumuman: ${item.title}`);
+        const copy=document.createElement("span");
+        copy.className="info-open-copy";
+        const title=document.createElement("h3");
+        title.textContent=`${item.icon}  ${item.title}`;
+        const body=document.createElement("p");
+        body.textContent=item.body;
+        const dateText=document.createElement("p");
+        dateText.textContent=`${item.category} · ${item.date}`;
+        copy.append(title,body,dateText);
+        const more=document.createElement("span");
+        more.className="info-read-more";
+        more.textContent="Baca selengkapnya →";
+        button.append(copy,more);
+        card.append(date,button);
+        container.append(card);
+      });
+    }
+    function renderAnnouncementDetail() {
+      const item=announcements.find(announcement=>announcement.id===state.selectedAnnouncementId);
+      if(!item)return false;
+      $("#announcementDetailCategory").textContent=item.category;
+      $("#announcementDetailDate").textContent=item.date;
+      $("#announcementDetailIcon").textContent=item.icon;
+      $("#announcementDetailTitle").textContent=item.title;
+      $("#announcementDetailBody").textContent=item.body;
+      const article=$("#announcementDetailArticle");
+      article.replaceChildren();
+      item.article.forEach(paragraph=>{
+        const entry=document.createElement("p");
+        entry.textContent=paragraph;
+        article.append(entry);
+      });
+      const list=$("#announcementDetailItems");
+      list.replaceChildren();
+      item.details.forEach(detail=>{
+        const entry=document.createElement("li");
+        entry.textContent=detail;
+        list.append(entry);
+      });
+      return true;
+    }
+    function openAnnouncement(id) {
+      if(!announcements.some(item=>item.id===id))return;
+      state.selectedAnnouncementId=id;
+      renderAnnouncementDetail();
+      navigate("announcement-detail");
+    }
+    function navigate(page) {
+      if(state.activeFocus) {
+        toast("Sesi pengerjaan sedang berjalan. Selesaikan atau akhiri sesi terlebih dahulu.");
+        return;
+      }
+      const target=$("#page-"+page);
+      if(!target)return;
+      state.page=page;
+      if(document.body.classList.contains("authenticated")) {
+        try {
+          sessionStorage.setItem(currentPageCheckpointKey(),page);
+        } catch(error) {
+          toast("Halaman tidak dapat disimpan untuk pemulihan setelah refresh: "+error.message);
+        }
+      }
+      $$(".page").forEach(section=>section.classList.toggle("active",section===target));
+      const activeNavPage=["library","transport"].includes(page)?"services":page==="announcement-detail"?"information":page==="academic-results"?"administration":page;
+      $$(".nav-link[data-page], .mobile-nav [data-page]").forEach(button=>button.classList.toggle("active",button.dataset.page===activeNavPage));
+      const names={home:"Dashboard",learning:"Pembelajaran",schedule:"Jadwal",administration:"Administrasi","academic-results":"Data akademik",information:"Informasi","announcement-detail":"Detail pengumuman",services:"Layanan sekolah",library:"Perpustakaan",transport:"Transportasi",help:"Pusat bantuan"};
+      $("#breadcrumbCurrent").textContent=names[page]||"Dashboard";
+      window.scrollTo({top:0,behavior:"smooth"});
+      $("#globalSearch").value=state.search;
+      if(page==="learning")renderCourses();
+      if(page==="schedule")renderSchedulePage(state.scheduleDay||currentSchoolDay()||"Senin");
+      if(page==="academic-results")renderAcademicResults();
+      if(page==="information")renderInformation();
+    }
+    function setTheme(dark) {
+      document.documentElement.dataset.theme=dark?"dark":"light";
+      localStorage.setItem("edunusa-theme",dark?"dark":"light");
+      $("#topTheme").textContent=dark?"☀️":"🌙";
+    }
+    function openModal(kind) {
+      const titles={document:"Ajukan dokumen",payment:"Tagihan sekolah",consult:"Konsultasi akademik",health:"Layanan UKS",transport:"Transportasi sekolah",library:"Layanan perpustakaan",it:"Bantuan IT",contact:"Hubungi sekolah"};
+      $("#modalTitle").textContent=titles[kind]||"Layanan sekolah";
+      const formKinds=["document","consult","health","it","contact"];
+      if(formKinds.includes(kind)) {
+        const category=kind==="document"?'<div class="form-field"><label for="requestType">Jenis dokumen</label><select id="requestType" required><option>Surat keterangan siswa</option><option>Surat aktif sekolah</option><option>Legalisir rapor</option><option>Surat rekomendasi</option></select></div>':"";
+        const subject=kind==="consult"?'<div class="form-field"><label for="requestType">Temui</label><select id="requestType"><option>Guru BK</option><option>Wali kelas</option><option>Guru mata pelajaran</option></select></div>':"";
+        $("#modalBody").innerHTML=`<form id="requestForm">${category}${subject}<div class="form-field"><label for="requestName">Nama siswa</label><input id="requestName" value="Nadia Putri" required></div><div class="form-field"><label for="requestContact">Email atau nomor WhatsApp yang bisa dihubungi</label><input id="requestContact" placeholder="nama@email.com / 08xxxxxxxxxx" required></div><div class="form-field"><label for="requestNote">Catatan tambahan</label><textarea id="requestNote" placeholder="Ceritakan kebutuhanmu..."></textarea></div><p class="request-whatsapp-note">📲 Pengajuan akan disiapkan di WhatsApp. Periksa pesannya lalu tekan Kirim.</p><div class="modal-actions"><button type="button" class="button-secondary" id="cancelModal">Batal</button><button class="button-primary" type="submit">Kirim pengajuan</button></div></form>`;
+        $("#requestForm").addEventListener("submit",event=>{
+          event.preventDefault();
+          const label=kind==="document"?$("#requestType").value:titles[kind];
+          const name=$("#requestName").value.trim();
+          const contact=$("#requestContact").value.trim();
+          const note=$("#requestNote").value.trim()||"Tidak ada";
+          const ref="EDU-"+String(Date.now()).slice(-6);
+          const messageLines=["Halo, saya ingin mengajukan bantuan melalui portal Zhennusa.","",`Nomor referensi: ${ref}`,`Jenis pengajuan: ${label}`];
+          if(kind==="consult")messageLines.push(`Ingin bertemu: ${$("#requestType").value}`);
+          messageLines.push(`Nama siswa: ${name}`,`Email/nomor WhatsApp: ${contact}`,`Catatan: ${note}`);
+          const message=messageLines.join("\n");
+          const whatsappUrl=`https://wa.me/${schoolWhatsAppNumber}?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl,"_blank","noopener,noreferrer");
+          const row=document.createElement("tr");
+          row.innerHTML=`<td>${label}</td><td>${new Intl.DateTimeFormat("id-ID",{day:"numeric",month:"short",year:"numeric"}).format(new Date())}</td><td>${ref}</td><td><span class="status wait">Menunggu WhatsApp</span></td>`;
+          $("#requestRows").prepend(row);
+          closeModal();toast("Pesan pengajuan siap di WhatsApp. Tekan Kirim untuk mengirim. Ref: "+ref);
+        });
+      } else {
+        const details={
+          payment:["💳","Tagihan SPP bulan November 2026","Status pembayaran: <strong>Lunas</strong><br>Riwayat dan informasi pembayaran tersedia melalui bagian administrasi sekolah."],
+          transport:["🚌","Layanan transportasi sekolah","Layanan antar-jemput sekolah gratis. Hubungi petugas transportasi untuk memastikan rute dan jadwal yang tersedia."],
+          library:["📚","Perpustakaan Zhennusa","Buka Senin–Jumat pukul 08:00–16:00. Maksimal peminjaman 3 buku selama 7 hari. Jangan lupa membawa kartu pelajar."],
+        };
+        const [icon,heading,text]=details[kind]||["ℹ️","Informasi layanan","Silakan hubungi bagian administrasi sekolah untuk informasi lebih lanjut."];
+        $("#modalBody").innerHTML=`<div style="text-align:center;padding:8px 0 13px"><div style="font-size:44px">${icon}</div><h3 style="margin:5px 0;font-size:14px">${heading}</h3><p style="color:var(--muted);font-size:11px;line-height:1.7">${text}</p></div><div class="modal-actions"><button class="button-primary" id="okayModal">Mengerti</button></div>`;
+      }
+      $("#modalBackdrop").classList.add("open");
+      const cancel=$("#cancelModal");if(cancel)cancel.onclick=closeModal;
+      const okay=$("#okayModal");if(okay)okay.onclick=closeModal;
+    }
+    function closeModal() { $("#modalBackdrop").classList.remove("open"); }
+    $("#libraryBookingForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      const studentName=$("#libraryBookingName").value.trim();
+      const bookTitle=$("#libraryBookingBook").value.trim();
+      if(!studentName||!bookTitle)return;
+      const message=[
+        "Halo, saya ingin booking peminjaman buku di Perpustakaan Zhennusa.",
+        "",
+        `Nama siswa: ${studentName}`,
+        `Judul buku: ${bookTitle}`,
+        "",
+        "Mohon cek ketersediaan buku dan konfirmasi kapan bisa diambil. Tolong teruskan pesan ini ke petugas perpustakaan bila diperlukan. Saya akan mengambil buku setelah mendapat konfirmasi. Terima kasih."
+      ].join("\n");
+      const whatsappUrl=`https://wa.me/${schoolWhatsAppNumber}?text=${encodeURIComponent(message)}`;
+      const bookingLink=$("#libraryBookingLink");
+      bookingLink.href=whatsappUrl;
+      bookingLink.hidden=false;
+      window.open(whatsappUrl,"_blank","noopener,noreferrer");
+      toast("Draf booking disiapkan. Jika WhatsApp tidak terbuka, klik tautan yang muncul lalu tekan Kirim.");
+    });
+    $("#transportReportForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      const studentName=$("#transportReportName").value.trim();
+      const reportType=$("#transportReportType").value;
+      const route=$("#transportReportRoute").value.trim();
+      const details=$("#transportReportDetails").value.trim();
+      if(!studentName||!details)return;
+      const message=[
+        `Halo, saya ingin menyampaikan ${reportType.toLocaleLowerCase("id")} terkait layanan transportasi Zhennusa.`,
+        "",
+        `Nama siswa: ${studentName}`,
+        ...(route?[`Rute/area: ${route}`]:[]),
+        `Pesan: ${details}`
+      ].join("\n");
+      const reportUrl=`https://wa.me/${schoolWhatsAppNumber}?text=${encodeURIComponent(message)}`;
+      const reportLink=$("#transportReportLink");
+      reportLink.href=reportUrl;
+      reportLink.hidden=false;
+      window.open(reportUrl,"_blank","noopener,noreferrer");
+      toast("Draf pengaduan disiapkan. Periksa dan tekan Kirim di WhatsApp.");
+    });
+    document.addEventListener("click",event=>{
+      if(state.activeFocus) {
+        const resume=event.target.closest("[data-resume-focus]");
+        if(resume){resumeFocusSession();return;}
+        const confirmAction=event.target.closest("[data-focus-confirm]");
+        if(confirmAction) {
+          const action=state.focusConfirmAction;
+          closeFocusConfirm();
+          if(confirmAction.dataset.focusConfirm==="accept") {
+            if(action==="finish")finishFocusSession(false,true);
+            if(action==="exit")endFocusSession(false);
+          }
+          return;
+        }
+        const focusAction=event.target.closest("[data-focus-action]");
+        if(focusAction) {
+          if(focusAction.dataset.focusAction==="finish")finishFocusSession();
+          if(focusAction.dataset.focusAction==="previous")showFocusQuestion(state.activeFocus.questionIndex-1);
+          if(focusAction.dataset.focusAction==="next")showFocusQuestion(state.activeFocus.questionIndex+1);
+          if(focusAction.dataset.focusAction==="exit")showFocusConfirm("exit","Akhiri sesi pengerjaan?","Waktu belajarmu tetap tersimpan, tetapi materi ini tidak akan ditandai selesai.","Akhiri sesi");
+          return;
+        }
+        const focusQuestion=event.target.closest("[data-focus-question]");
+        if(focusQuestion){showFocusQuestion(Number(focusQuestion.dataset.focusQuestion));return;}
+        if(event.target.closest("#focusFullscreen")) {
+          if(!document.documentElement.requestFullscreen) {
+            toast("Mode layar penuh tidak tersedia di browser ini.");
+            return;
+          }
+          document.documentElement.requestFullscreen().then(()=>{state.focusWasFullscreen=true;}).catch(()=>toast("Browser tidak mengizinkan mode layar penuh."));
+          return;
+        }
+        if(!event.target.closest("#focusWorkView")) {
+          event.preventDefault();
+          toast("Selesaikan atau akhiri sesi fokus untuk membuka menu lain.");
+          return;
+        }
+      }
+      const announcement=event.target.closest("[data-announcement-id]");
+      if(announcement){openAnnouncement(announcement.dataset.announcementId);return;}
+      const scheduleDay=event.target.closest("[data-schedule-day]");
+      if(scheduleDay){renderSchedulePage(scheduleDay.dataset.scheduleDay);return;}
+      const nav=event.target.closest("[data-page]");
+      if(nav){navigate(nav.dataset.page);return;}
+      const modal=event.target.closest("[data-modal]");
+      if(modal){openModal(modal.dataset.modal);return;}
+      const course=event.target.closest("[data-course]");
+      if(course) {
+        if(state.page!=="learning")navigate("learning");
+        openCourse(course.dataset.course);
+        return;
+      }
+      const courseTab=event.target.closest("[data-course-tab]");
+      if(courseTab){setCourseTab(courseTab.dataset.courseTab);return;}
+      const lesson=event.target.closest("[data-lesson-index]");
+      if(lesson){state.lessonIndex=Number(lesson.dataset.lessonIndex);renderCourseDetail();return;}
+      const uploadAssignment=event.target.closest("[data-assignment-upload]");
+      if(uploadAssignment){
+        if(isDemoSession||isLocalAccount){toast("Pengiriman tugas WhatsApp memerlukan akun Firebase dan server tugas yang sudah dikonfigurasi.");return;}
+        const input=uploadAssignment.parentElement.querySelector("[data-assignment-photo]");
+        if(input)input.click();
+        return;
+      }
+      const academicCourse=event.target.closest("[data-academic-course]");
+      if(academicCourse) {
+        const courseName=academicCourse.dataset.academicCourse;
+        navigate("learning");
+        openCourse(courseName);
+        return;
+      }
+      const backToCourses=event.target.closest("#backToCourses");
+      if(backToCourses){closeCourse();return;}
+      const startFocus=event.target.closest("[data-start-focus]");
+      if(startFocus){startFocusSession();return;}
+      const prompt=event.target.closest("[data-companion-prompt]");
+      if(prompt){sendCompanionMessage(prompt.dataset.companionPrompt);return;}
+      const filter=event.target.closest("[data-filter]");
+      if(filter){state.courseFilter=filter.dataset.filter;$$("[data-filter]").forEach(button=>button.classList.toggle("active",button===filter));renderCourses();return;}
+      const infoFilter=event.target.closest("[data-info-filter]");
+      if(infoFilter){state.infoFilter=infoFilter.dataset.infoFilter;$$("[data-info-filter]").forEach(button=>button.classList.toggle("active",button===infoFilter));renderInformation();return;}
+    });
+    $("#assignmentList").addEventListener("change",event=>{
+      const input=event.target.closest("[data-assignment-photo]");
+      if(input)submitAssignmentPhoto(input);
+    });
+    $("#topTheme").addEventListener("click",()=>setTheme(document.documentElement.dataset.theme!=="dark"));
+    $("#focusResultBack").addEventListener("click",()=>{
+      $("#focusWorkView").classList.remove("active","result-mode");
+      $("#focusWorkView").classList.add("focus-protected");
+      $("#focusWorkView").setAttribute("aria-hidden","true");
+      $("#focusWorkView").setAttribute("aria-label","Sesi pengerjaan materi");
+      $("#focusWorkView .focus-brand small").textContent="Mode pengerjaan fokus";
+      $("#focusQuizView").hidden=false;
+      $("#focusResultView").hidden=true;
+      $("#focusFullscreen").hidden=false;
+      $('[data-focus-action="exit"]').hidden=false;
+      document.body.classList.remove("focus-active");
+      setFocusBackgroundLocked(false);
+      renderCourseDetail();
+      renderCourses();
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+    $("#announcementBackButton").addEventListener("click",()=>{
+      state.selectedAnnouncementId=null;
+      navigate("information");
+    });
+    $("#closeModal").addEventListener("click",closeModal);
+    $("#modalBackdrop").addEventListener("click",event=>{if(event.target.id==="modalBackdrop")closeModal();});
+    $("#notificationsButton").addEventListener("click",()=>{navigate("information");toast("Menampilkan pengumuman terbaru 📢");});
+    $("#dashboardGradesButton").addEventListener("click",()=>navigate("academic-results"));
+    $("#gradesButton").addEventListener("click",()=>navigate("academic-results"));
+    $("#helpCompanion").addEventListener("click",()=>openCompanion());
+    $("#courseSearch").addEventListener("input",event=>{
+      state.search=event.target.value;
+      $("#globalSearch").value=state.search;
+      renderCourses();
+    });
+    $("#courseSearch").addEventListener("keydown",event=>{
+      if(event.key==="Enter")saveSearchHistory(event.currentTarget.value);
+    });
+    $("#globalSearch").addEventListener("input",event=>{
+      state.search=event.target.value;
+      $("#courseSearch").value=state.search;
+      renderSearchHistory(true);
+      if(state.page==="learning")renderCourses();
+      if(state.page==="information")renderInformation();
+      if(state.page!=="learning"&&state.page!=="information"&&state.search.trim()) {
+        const match=courses.some(course=>`${course.name} ${course.category}`.toLocaleLowerCase("id").includes(state.search.toLocaleLowerCase("id")));
+        navigate(match?"learning":"information");
+        $("#globalSearch").value=state.search;
+      }
+    });
+    $("#globalSearch").addEventListener("focus",()=>renderSearchHistory(true));
+    $("#globalSearch").addEventListener("keydown",event=>{
+      if(event.key==="Enter")saveSearchHistory(event.currentTarget.value);
+      if(event.key==="Escape")$("#searchHistoryPanel").hidden=true;
+    });
+    $("#searchHistoryPanel").addEventListener("click",event=>{
+      const clear=event.target.closest("[data-search-clear]");
+      if(clear) {
+        try {
+          localStorage.removeItem(searchHistoryStorageKey());
+          renderSearchHistory(true);
+        } catch(error) {
+          toast("Riwayat pencarian tidak dapat dihapus: "+error.message);
+        }
+        return;
+      }
+      const remove=event.target.closest("[data-search-remove]");
+      if(remove) {
+        try {
+          const value=remove.dataset.searchRemove;
+          const history=readSearchHistory().filter(query=>query!==value);
+          localStorage.setItem(searchHistoryStorageKey(),JSON.stringify(history));
+          renderSearchHistory(true);
+        } catch(error) {
+          toast("Riwayat pencarian tidak dapat dihapus: "+error.message);
+        }
+        return;
+      }
+      const queryButton=event.target.closest("[data-search-query]");
+      if(queryButton) {
+        const query=queryButton.dataset.searchQuery;
+        $("#globalSearch").value=query;
+        $("#courseSearch").value=query;
+        state.search=query;
+        saveSearchHistory(query);
+        const exactCourse=courses.find(course=>course.name.toLocaleLowerCase("id")===query.toLocaleLowerCase("id"));
+        const matchingCourse=courses.find(course=>course.name.toLocaleLowerCase("id").includes(query.toLocaleLowerCase("id"))||course.teacher.toLocaleLowerCase("id").includes(query.toLocaleLowerCase("id")));
+        if(exactCourse) {
+          navigate("learning");
+          openCourse(exactCourse.name);
+        } else {
+          navigate(matchingCourse?"learning":"information");
+        }
+        $("#searchHistoryPanel").hidden=true;
+      }
+    });
+    document.addEventListener("click",event=>{
+      if(!event.target.closest(".search-wrap"))$("#searchHistoryPanel").hidden=true;
+    });
+    $("#taskList").addEventListener("change",event=>{
+      const task=event.target.closest(".task");if(task)task.classList.toggle("done",event.target.checked);
+    });
+    $("#courseNotes").addEventListener("input",event=>{
+      if(!state.openCourse)return;
+      state.courseNotes[state.openCourse]=event.target.value;
+      localStorage.setItem("edunusa-course-notes",JSON.stringify(state.courseNotes));
+      $("#notesStatus").textContent=event.target.value?"Tersimpan otomatis di perangkat ini.":"Belum ada catatan.";
+      $("#downloadCourseNotes").disabled=!event.target.value.trim();
+    });
+    $("#downloadCourseNotes").addEventListener("click",()=>{
+      if(!state.openCourse)return;
+      const note=$("#courseNotes").value.trim();
+      if(!note){toast("Tulis catatan terlebih dahulu sebelum mengunduh.");return;}
+      const safeCourseName=state.openCourse.replace(/[<>:"/\\|?*\x00-\x1f]/g,"-").trim();
+      const blob=new Blob(["\uFEFF"+note],{type:"text/plain;charset=utf-8"});
+      const url=URL.createObjectURL(blob);
+      const link=document.createElement("a");
+      link.href=url;
+      link.download=`Catatan-${safeCourseName}.txt`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      toast("Catatan berhasil diunduh.");
+    });
+    $("#focusAnswers").addEventListener("change",event=>{
+      if(!state.activeFocus||event.target.name!=="focusAnswer")return;
+      const questionIndex=state.activeFocus.questionIndex||0;
+      state.activeFocus.selectedAnswers[questionIndex]=Number(event.target.value);
+      state.activeFocus.skippedAnswers[questionIndex]=false;
+      const questionButton=$("#focusQuestionNav").querySelector(`[data-focus-question="${questionIndex}"]`);
+      questionButton?.classList.remove("skipped");
+      questionButton?.classList.add("answered");
+      if(questionButton)questionButton.setAttribute("aria-label",`Buka soal ${questionIndex+1}, terjawab`);
+      saveFocusSession();
+    });
+    document.addEventListener("visibilitychange",()=>{
+      if(document.hidden&&state.activeFocus)pauseFocusSession("Kamu meninggalkan atau berpindah dari halaman pengerjaan. Waktu dihentikan. Kembali ke halaman ini dan lanjutkan sesi untuk membuka kembali soal.");
+    });
+    document.addEventListener("fullscreenchange",()=>{
+      if(state.focusWasFullscreen&&!document.fullscreenElement&&state.activeFocus&&!state.activeFocus.paused) {
+        state.focusWasFullscreen=false;
+        pauseFocusSession("Mode layar penuh ditutup. Sesi dijeda sampai kamu siap melanjutkan.");
+      }
+    });
+    ["copy","cut","paste","contextmenu","selectstart","dragstart"].forEach(type=>{
+      $("#focusWorkView").addEventListener(type,event=>{
+        if(event.target.closest(".focus-protected")) {
+          event.preventDefault();
+          if(type==="copy"||type==="cut"||type==="contextmenu")toast("Salin-tempel dinonaktifkan selama sesi fokus.");
+        }
+      });
+    });
+    document.addEventListener("keydown",event=>{
+      if(!state.activeFocus||!event.target.closest("#focusWorkView"))return;
+      const key=event.key.toLocaleLowerCase("en");
+      if((event.ctrlKey||event.metaKey)&&["a","c","x","v","insert"].includes(key)||event.key==="PrintScreen") {
+        event.preventDefault();
+        toast("Pintasan salin-tempel dinonaktifkan selama sesi fokus.");
+      }
+    },true);
+    window.addEventListener("beforeunload",event=>{
+      if(!state.activeFocus)return;
+      saveFocusSession();
+      event.preventDefault();
+      event.returnValue="";
+    });
+    $("#companionLaunch").addEventListener("click",openCompanion);
+    $("#closeCompanion").addEventListener("click",closeCompanion);
+    $("#clearCompanion").addEventListener("click",resetCompanion);
+    $("#companionForm").addEventListener("submit",event=>{
+      event.preventDefault();
+      sendCompanionMessage($("#companionInput").value);
+    });
+    document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(state.focusConfirmAction){closeFocusConfirm();return;}if($("#profileBackdrop").classList.contains("open")){closeProfileDrawer();return;}closeModal();if($("#companionPanel").classList.contains("open"))closeCompanion();}});
+    const savedTheme=localStorage.getItem("edunusa-theme");
+    setTheme(savedTheme==="dark");
+    updateDashboardDate();
+    setInterval(updateDashboardDate,60000);
+    renderCourses();
+    renderAcademicResults();
+    renderUpcomingTasks();
+    renderInformation();
+    if(sessionStorage.getItem("edunusa-demo-session")==="true") {
+      isDemoSession=true;
+      enterAuthenticatedApp("demo@zhennusa.local","demo-account");
+    } else if(sessionStorage.getItem("edunusa-local-session")) {
+      const localEmail=sessionStorage.getItem("edunusa-local-session");
+      const localAccount=readLocalAccounts()[localEmail];
+      if(localAccount) {
+        isLocalAccount=true;
+        enterAuthenticatedApp(localAccount.email||localEmail,localEmail);
+      } else {
+        sessionStorage.removeItem("edunusa-local-session");
+        restoreFirebaseSession();
+      }
+    } else {
+      restoreFirebaseSession();
+    }
+  </script>
+</body>
+</html>
